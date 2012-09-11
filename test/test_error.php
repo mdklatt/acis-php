@@ -1,52 +1,52 @@
 <?php
-/* Unit testing for error.php.
-
-*/
-
-require_once 'unittest.php';
-require_once 'libpath.php';
+/**
+ * PHPUnit tests for error.php.
+ *
+ * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
+ * command.
+ */
 require_once 'error.php';
 
 
-abstract class _TestError extends UnitTest_TestCase
-{   
-    private $_message;
-    
-    protected function setUp()
-    {
-        $this->_message = "_TestError error message";
-        return;
-    }
-    
-    public function testInit() 
-    {
-        $error = new $this->_ERROR_CLASS($this->_message);
-        assert($error->getMessage() == $this->_message);
-        return;
-    }
+abstract class _ErrorTest extends PHPUnit_Framework_TestCase
+{
+	protected $_ERROR_CLASS;
+
+	protected function setUp()
+	{
+		$this->_message = "test error message";
+		return;
+	}
+
+	public function testMessage()
+	{
+		$error = new $this->_ERROR_CLASS($this->_message);
+		$this->assertEquals($error->getMessage(), $this->_message);
+		return;
+	}
+
+	public function testThrow()
+	{
+		$this->setExpectedException($this->_ERROR_CLASS);
+		throw new $this->_ERROR_CLASS($this->_message);
+		return;
+	}
 }
 
 
-class TestParameterError extends _TestError
+class ParameterErrorTest extends _ErrorTest
 {
     protected $_ERROR_CLASS = 'ACIS_ParameterError';
 }
 
 
-class TestResultError extends _TestError
+class ResultErrorTest extends _ErrorTest
 {
     protected $_ERROR_CLASS = 'ACIS_ResultError';
 }
 
 
-class TestRequestError extends _TestError
+class RequestErrorTest extends _ErrorTest
 {
     protected $_ERROR_CLASS = 'ACIS_RequestError';
 }
-
-
-$suite = new UnitTest_TestSuite();
-$suite->addTests('TestParameterError');
-$suite->addTests('TestResultError');
-$suite->addTests('TestRequestError');
-$suite->run();

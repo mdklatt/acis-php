@@ -1,0 +1,10 @@
+<!-- Configuration file for phpunit. -->
+<phpunit bootstrap="_env.php">
+	<testsuites>
+		<testsuite name="acis">
+			<file>test_error.php</file>
+			<file>test_request.php</file>
+			<file>test_result.php</file>
+		</testsuite>
+	</testsuites>
+</phpunit>

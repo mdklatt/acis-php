@@ -1,17 +1,17 @@
 <?php
-/* Unit testing for request.php.
-
-*/
-
-require_once 'unittest.php';
-require_once 'libpath.php';
-require_once 'request.php';
+/**
+ * PHPUnit tests for request.php.
+ *
+ * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
+ * command.
+ */
 require_once 'error.php';
+require_once 'request.php';
 
 
-class TestRequest extends UnitTest_TestCase
+class RequestTest extends PHPUnit_Framework_TestCase
 {
-    protected $_JSON_FILE = 'StnData.json';
+    protected $_JSON_FILE = 'data/StnData.json';
     protected $_REQUEST_CLASS = 'ACIS_Request';
     
     protected $_query;
@@ -36,48 +36,39 @@ class TestRequest extends UnitTest_TestCase
     public function testUrl()
     {
         $url = implode('/', array(ACIS_Request::SERVER, $this->_query));
-        assert($this->_request->url == $url);
+        $this->assertEquals($this->_request->url, $url);
         return;
     }
     
     public function testSubmit()
     {
         list($params, $result) = $this->_request->submit($this->_params);
-        assert($params == $this->_params);
-        assert($result == $this->_result);
+        $this->assertEquals($params, $this->_params);
+        $this->assertEquals($result, $this->_result);
         return;
     }
     
     public function testRequestError()
     {
+		$this->setExpectedException('ACIS_RequestError');
         $this->_params = array();
-        //unset($this->_params['sid']);
-        try {
-            $this->_request->submit($this->_params);
-        }
-        catch (ACIS_RequestError $err) {
-            return;
-        }
-        assert(false);
+        $this->_request->submit($this->_params);
+        return;
     }
 
     public function testResultError()
     {
+		$this->setExpectedException('ACIS_ResultError');
         $this->_params['sid'] = '';
-        try {
-            $this->_request->submit($this->_params);
-        }
-        catch (ACIS_ResultError $err) {
-            return;
-        }
-        assert(false);
+        $this->_request->submit($this->_params);
+        return;
     }
 }
 
 
-class TestStnMetaRequest extends TestRequest
+class StnMetaRequestTest extends RequestTest
 {
-    protected $_JSON_FILE = 'StnMeta.json';
+    protected $_JSON_FILE = 'data/StnMeta.json';
     protected $_REQUEST_CLASS = 'ACIS_StnMetaRequest';
     
     protected function setUp()
@@ -94,20 +85,16 @@ class TestStnMetaRequest extends TestRequest
         $this->_request->location(array('sids'=>'okc,tul'));
         $this->_request->meta(array('county', 'name'));
         list($params, $result) = $this->_request->submit();
-        assert($result == $this->_result);
+        $this->assertEquals($result, $this->_result);
         return;
     }
 
     public function testRequestError()
     {
+		$this->setExpectedException('ACIS_RequestError');
         $this->_request->location(array('bbox' =>''));
-        try {
-            $this->_request->submit();
-        }
-        catch (ACIS_RequestError $err) {
-            return;
-        }
-        assert(false);
+        $this->_request->submit();
+        return;
     }
     
     public function testResultError()
@@ -118,9 +105,9 @@ class TestStnMetaRequest extends TestRequest
 }
     
 
-class TestStnDataRequest extends TestStnMetaRequest
+class StnDataRequestTest extends StnMetaRequestTest
 {
-    protected $_JSON_FILE = 'StnData.json';
+    protected $_JSON_FILE = 'data/StnData.json';
     protected $_REQUEST_CLASS = 'ACIS_StnDataRequest';
     
     public function testSubmit()
@@ -131,40 +118,31 @@ class TestStnDataRequest extends TestStnMetaRequest
         $this->_request->addElement('mint', array('smry' => 'min'));
         $this->_request->addElement('maxt', array('smry' => 'max'));        
         list($params, $result) = $this->_request->submit();
-        assert($result == $this->_result);
+        $this->assertEquals($result, $this->_result);
         return;
     }
 
     public function testRequestError()
     {
-        try {
-            $this->_request->submit();  // empty params
-        }
-        catch (ACIS_RequestError $err) {
-            return;
-        }
-        assert(false);
+		$this->setExpectedException('ACIS_RequestError');
+        $this->_request->submit();  // empty params
+        return;
     }
     
     public function testResultError()
     {
+		$this->setExpectedException('ACIS_ResultError');
         $this->_request->location(array('sid'=>''));
         $this->_request->dates('2011-12-31', '2012-01-01');        
-        try {
-            $this->_request->submit();
-        }
-        catch (ACIS_ResultError $err) {
-            return;
-        }
-        assert(false);
+        $this->_request->submit();
         return;
     }
 }
 
 
-class TestMultiStnDataRequest extends TestStnDataRequest
+class MultiStnDataRequestTest extends StnDataRequestTest
 {
-    protected $_JSON_FILE = 'MultiStnData.json';
+    protected $_JSON_FILE = 'data/MultiStnData.json';
     protected $_REQUEST_CLASS = 'ACIS_MultiStnDataRequest';
     
     public function testSubmit()
@@ -175,35 +153,25 @@ class TestMultiStnDataRequest extends TestStnDataRequest
         $this->_request->addElement('mint', array('smry' => 'min'));
         $this->_request->addElement('maxt', array('smry' => 'max'));        
         list($params, $result) = $this->_request->submit();
-        assert($result == $this->_result);
+        $this->assertEquals($result, $this->_result);
         return;
     }
 
     public function testRequestError()
     {
-        try {
-            $this->_request->submit();
-        }
-        catch (ACIS_RequestError $err) {
-            return;
-        }
-        assert(false);
+		$this->setExpectedException('ACIS_RequestError');
+        $this->_request->submit();
         return;
     }
     
     public function testResultError()
     {
-        // Nothing seems to cause MultiStnData to return an error object.
+		//$this->setExpectedException('ACIS_ResultError');
+        //$this->_request->location(array('bbox' =>''));
+        //$this->_request->dates('2011-12-31', '2012-01-01');
+        //$this->_request->addElement('mint', array('smry' => 'min'));
+        //$this->_request->meta(array('county', 'name'));
+        //$this->_request->submit();
         return;
     }
 }
-    
-
-// Execute tests.
-
-$suite = new UnitTest_TestSuite();
-$suite->addTests('TestRequest');
-$suite->addTests('TestStnMetaRequest');
-$suite->addTests('TestStnDataRequest');
-$suite->addTests('TestMultiStnDataRequest');
-$suite->run();

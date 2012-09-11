@@ -1,17 +1,20 @@
 <?php
-/* Unit testing for result.php.
-
-*/
-
-require_once 'unittest.php';
-require_once 'libpath.php';
+/**
+ * PHPUnit tests for result.php.
+ *
+ * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
+ * command.
+ */
+require_once 'error.php';
 require_once 'result.php';
 
 
 // Define the TestCase classes.
 
-abstract class _TestResult extends UnitTest_TestCase
+abstract class _ResultTest extends PHPUnit_Framework_TestCase
 {
+	protected $_JSON_FILE = null;
+    
     protected function _loadData()
     {
         return json_decode(file_get_contents($this->_JSON_FILE), true);
@@ -19,7 +22,7 @@ abstract class _TestResult extends UnitTest_TestCase
 }
 
 
-abstract class _TestMetaResult extends _TestResult
+abstract class _MetaResultTest extends _ResultTest
 {
     protected $_params;
     protected $_result;
@@ -38,14 +41,14 @@ abstract class _TestMetaResult extends _TestResult
     {
         $result = new $this->_RESULT_CLASS($this->_params, $this->_result);
         foreach ($result->meta as $uid => $meta) {
-            assert($meta == $this->_meta[$uid]);
+            $this->assertEquals($meta, $this->_meta[$uid]);
         }
         return;
     }
 }
 
 
-class _TestDataResult extends _TestMetaResult
+abstract class _DataResultTest extends _MetaResultTest
 {
     protected $_data;
     protected $_smry;
@@ -72,7 +75,7 @@ class _TestDataResult extends _TestMetaResult
     {
         $result = new $this->_RESULT_CLASS($this->_params, $this->_result);
         foreach ($result->data as $uid => $data) {
-            assert($data == $this->_data[$uid]);
+            $this->assertEquals($data, $this->_data[$uid]);
         }
         return;
     }
@@ -82,7 +85,7 @@ class _TestDataResult extends _TestMetaResult
         $result = new $this->_RESULT_CLASS($this->_params, $this->_result);
         foreach ($result->smry as $uid => $smry) {
             $record = array_combine($this->_fields, $this->_smry[$uid]);
-            assert($smry == $record);
+            $this->assertEquals($smry, $record);
         }
         return;
     }
@@ -90,13 +93,13 @@ class _TestDataResult extends _TestMetaResult
     public function testFields()
     {
         $result = new $this->_RESULT_CLASS($this->_params, $this->_result);
-        assert($result->fields == $this->_fields);
+        $this->assertEquals($result->fields, $this->_fields);
     }
 
     public function testCount()
     {
         $result = new $this->_RESULT_CLASS($this->_params, $this->_result);
-        assert(count($result) == count($this->_records));
+        $this->assertEquals(count($result), count($this->_records));
     }
 
     public function testIter()
@@ -105,7 +108,8 @@ class _TestDataResult extends _TestMetaResult
         $result = new $this->_RESULT_CLASS($this->_params, $this->_result);
         $i = 0;
         foreach ($result as $record) {
-            assert($record == array_combine($fields, $this->_records[$i]));
+            $this->assertEquals($record, 
+            		array_combine($fields, $this->_records[$i]));
             ++$i;
         }
         return;
@@ -113,70 +117,49 @@ class _TestDataResult extends _TestMetaResult
 }
 
 
-class TestStnMetaResult extends _TestMetaResult
+class StnMetaResultTest extends _MetaResultTest
 {
-    protected $_JSON_FILE = 'StnMeta.json';
+    protected $_JSON_FILE = 'data/StnMeta.json';
     protected $_RESULT_CLASS = 'ACIS_StnMetaResult';
 
     public function testNoUid()
     {
+    	$message = 'metadata does not contain uid';
+		$this->setExpectedException('ACIS_ParameterError', $message);
         unset ($this->_result['meta'][0]['uid']);
-        try {
-            new $this->_RESULT_CLASS($this->_params, $this->_result);
-        }
-        catch (ACIS_ParameterError $err) {  // expected result
-            return;
-        }
-        assert(false);
+        new $this->_RESULT_CLASS($this->_params, $this->_result);
+    	return;
     }
 }
 
 
-class TestStnDataResult extends _TestDataResult
+class StnDataResultTest extends _DataResultTest
 {
-    protected $_JSON_FILE = 'StnData.json';
+    protected $_JSON_FILE = 'data/StnData.json';
     protected $_RESULT_CLASS = 'ACIS_StnDataResult';
 
     public function testNoUid()
     {
+    	$message = 'metadata does not contain uid';
+		$this->setExpectedException('ACIS_ParameterError', $message);
         unset ($this->_result['meta']['uid']);
-        try {
-            new $this->_RESULT_CLASS($this->_params, $this->_result);
-        }
-        catch (ACIS_ParameterError $ex) {  // expected result
-            return;
-        }
-        assert(false);
+        new $this->_RESULT_CLASS($this->_params, $this->_result);
+        return;
     }
 }
 
 
-class TestMultiStnDataResult extends _TestDataResult
+class MultiStnDataResultTest extends _DataResultTest
 {
-    protected $_JSON_FILE = 'MultiStnData.json';
+    protected $_JSON_FILE = 'data/MultiStnData.json';
     protected $_RESULT_CLASS = 'ACIS_MultiStnDataResult';
 
     public function testNoUid()
     {
+    	$message = 'metadata does not contain uid';
+		$this->setExpectedException('ACIS_ParameterError', $message);
         unset ($this->_result['data'][0]['meta']['uid']);
-        try {
-            new $this->_RESULT_CLASS($this->_params, $this->_result);
-        }
-        catch (ACIS_ParameterError $ex) {  // expected result
-            return;
-        }
-        assert(false);
+        new $this->_RESULT_CLASS($this->_params, $this->_result);
+        return;
     }
 }
-
-
-// Execute tests.
-
-date_default_timezone_set('America/Chicago');  // stop DateTime from bitching
-$suite = new UnitTest_TestSuite();
-$suite->addTests('TestStnMetaResult');
-$suite->addTests('TestStnDataResult');
-$suite->addTests('TestMultiStnDataResult');
-$suite->run();
-
-

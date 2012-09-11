@@ -1,0 +1,16 @@
+# Travis CI configuration for the acis library.
+#
+# The Travis CI service verifies each GitHub commit for correctness.
+# <http://travis-ci.org>
+
+
+# Language specifications
+
+language: php
+php:
+    - 5.3
+
+
+# Test script
+
+script: php -f test/test_acis.php

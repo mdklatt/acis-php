@@ -9,10 +9,10 @@ require_once 'error.php';
 require_once 'request.php';
 
 
-class RequestTest extends PHPUnit_Framework_TestCase
+abstract class _RequestTest extends PHPUnit_Framework_TestCase
 {
-    protected $_JSON_FILE = 'data/StnData.json';
-    protected $_REQUEST_CLASS = 'ACIS_Request';
+    protected $_JSON_FILE;
+    protected $_TEST_CLASS;
     
     protected $_query;
     protected $_params;
@@ -26,152 +26,64 @@ class RequestTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $testData = $this->_loadData();
-        $this->_query = $testData['query'];
-        $this->_params = $testData['params'];
-        $this->_result = $testData['result'];
-        $this->_request = new $this->_REQUEST_CLASS($this->_query);
+        $params = $testData['params'];
+        $result = $testData['result'];
+        $this->_query = array('params' => $params, 'result' => $result);
+        $this->_request = new $this->_TEST_CLASS();
         return;
-    }
-    
-    public function testUrl()
-    {
-        $url = implode('/', array(ACIS_Request::SERVER, $this->_query));
-        $this->assertEquals($this->_request->url, $url);
-        return;
-    }
-    
-    public function testSubmit()
-    {
-        list($params, $result) = $this->_request->submit($this->_params);
-        $this->assertEquals($params, $this->_params);
-        $this->assertEquals($result, $this->_result);
-        return;
-    }
-    
-    public function testRequestError()
-    {
-		$this->setExpectedException('ACIS_RequestError');
-        $this->_params = array();
-        $this->_request->submit($this->_params);
-        return;
-    }
-
-    public function testResultError()
-    {
-		$this->setExpectedException('ACIS_ResultError');
-        $this->_params['sid'] = '';
-        $this->_request->submit($this->_params);
-        return;
-    }
+    }    
 }
 
 
-class StnMetaRequestTest extends RequestTest
+class StnMetaRequestTest extends _RequestTest
 {
     protected $_JSON_FILE = 'data/StnMeta.json';
-    protected $_REQUEST_CLASS = 'ACIS_StnMetaRequest';
-    
-    protected function setUp()
-    {
-        $testData = $this->_loadData();
-        $this->_query = $testData['query'];
-        $this->_params = $testData['params'];
-        $this->_result = $testData['result'];
-        $this->_request = new $this->_REQUEST_CLASS();    
-    }
+    protected $_TEST_CLASS = 'ACIS_StnMetaRequest';
     
     public function testSubmit()
     {
         $this->_request->location(array('sids'=>'okc,tul'));
-        $this->_request->meta(array('county', 'name'));
-        list($params, $result) = $this->_request->submit();
-        $this->assertEquals($result, $this->_result);
-        return;
-    }
-
-    public function testRequestError()
-    {
-		$this->setExpectedException('ACIS_RequestError');
-        $this->_request->location(array('bbox' =>''));
-        $this->_request->submit();
-        return;
-    }
-    
-    public function testResultError()
-    {
-        // Nothing seems to cause StnMeta to return an error.
+        $this->_request->metadata(array('county', 'name'));
+        $query = $this->_request->submit();
+        $this->assertEquals($query['result'], $this->_query['result']);
         return;
     }
 }
     
 
-class StnDataRequestTest extends StnMetaRequestTest
+class StnDataRequestTest extends _RequestTest
 {
     protected $_JSON_FILE = 'data/StnData.json';
-    protected $_REQUEST_CLASS = 'ACIS_StnDataRequest';
+    protected $_TEST_CLASS = 'ACIS_StnDataRequest';
     
     public function testSubmit()
     {
         $this->_request->location(array('sid'=>'okc'));
-        $this->_request->meta(array('county', 'name'));
+        $this->_request->metadata(array('county', 'name'));
         $this->_request->dates('2011-12-31', '2012-01-01');
         $this->_request->addElement('mint', array('smry' => 'min'));
         $this->_request->addElement('maxt', array('smry' => 'max'));        
-        list($params, $result) = $this->_request->submit();
-        $this->assertEquals($result, $this->_result);
-        return;
-    }
-
-    public function testRequestError()
-    {
-		$this->setExpectedException('ACIS_RequestError');
-        $this->_request->submit();  // empty params
-        return;
-    }
-    
-    public function testResultError()
-    {
-		$this->setExpectedException('ACIS_ResultError');
-        $this->_request->location(array('sid'=>''));
-        $this->_request->dates('2011-12-31', '2012-01-01');        
-        $this->_request->submit();
+        $query = $this->_request->submit();
+        $this->assertEquals($query['result'], $this->_query['result']);
         return;
     }
 }
 
 
-class MultiStnDataRequestTest extends StnDataRequestTest
+class MultiStnDataRequestTest extends _RequestTest
 {
     protected $_JSON_FILE = 'data/MultiStnData.json';
-    protected $_REQUEST_CLASS = 'ACIS_MultiStnDataRequest';
+    protected $_TEST_CLASS = 'ACIS_MultiStnDataRequest';
     
     public function testSubmit()
     {
         $this->_request->location(array('sids'=>'okc,tul'));
-        $this->_request->meta(array('county', 'name'));
+        $this->_request->metadata(array('county', 'name'));
         $this->_request->dates('2011-12-31', '2012-01-01');
         $this->_request->addElement('mint', array('smry' => 'min'));
         $this->_request->addElement('maxt', array('smry' => 'max'));        
-        list($params, $result) = $this->_request->submit();
-        $this->assertEquals($result, $this->_result);
-        return;
-    }
-
-    public function testRequestError()
-    {
-		$this->setExpectedException('ACIS_RequestError');
-        $this->_request->submit();
-        return;
-    }
-    
-    public function testResultError()
-    {
-		//$this->setExpectedException('ACIS_ResultError');
-        //$this->_request->location(array('bbox' =>''));
-        //$this->_request->dates('2011-12-31', '2012-01-01');
-        //$this->_request->addElement('mint', array('smry' => 'min'));
-        //$this->_request->meta(array('county', 'name'));
-        //$this->_request->submit();
+        $query = $this->_request->submit();
+        $this->assertEquals($query['result'], $this->_query['result']);
         return;
     }
 }

@@ -1,30 +1,37 @@
 <?php
-/* Classes for working with an ACIS web services result object.
-
-This implementation is based on ACIS Web Services Version 2:
-<http://data.rcc-acis.org/doc/>.
-
-*/
-
+/**
+ *
+ *
+ */
 require_once 'error.php';
 require_once 'date.php';
 
-class ACIS_StnMetaResult
+
+abstract class _ACIS_JsonResult
+{
+    protected function __construct($query)
+    {
+        if (array_key_exists('error', $query['result'])) {
+            throw new ACIS_ResultError($query['result']['error']);
+        }
+        return;
+    }
+}
+
+
+class ACIS_StnMetaResult extends _ACIS_JsonResult
 {
 	public $meta = array();
 
-	public function __construct($params, $result)
+	public function __construct($query)
 	{
-		/* Iinitialize an ACIS_StnMetaResult object. */
-
-		// The $params parameter is strictly for interface consistency and is
-		// ignored here.
-		foreach ($result['meta'] as $site) {
+		parent::__construct($query);
+		foreach ($query['result']['meta'] as $site) {
 			if (!array_key_exists('uid', $site)) {
 				throw new ACIS_ParameterError('metadata does not contain uid');
 			}
 			$uid = $site['uid'];
-			unset ($site['uid']);
+			unset($site['uid']);
 			$this->meta[$uid] = $site;
 		}
 		return;
@@ -32,31 +39,29 @@ class ACIS_StnMetaResult
 }
 
 
-abstract class _ACIS_DataResult
+abstract class _ACIS_DataResult extends _ACIS_JsonResult
 implements Countable, Iterator
 {
     public $meta = array();
     public $data = array();
     public $smry = array();
-    public $fields;
+    public $fields = array();
 
 	private $_dataPos;
 
-
-    public function __construct($params)
+    public function __construct($query)
     {
-		/* Initialize an _ACIS_DataResult object. */
-
+    	parent::__construct($query);
 		$this->_dataPos = new stdClass();
 		$this->rewind();  // initialize internal array pointer
-		if (is_array($params['elems'])) {
-			$this->fields = array();
-			foreach ($params['elems'] as $elem) {
+		$elems = $query['params']['elems'];
+		if (is_array($elems)) {
+			foreach ($elems as $elem) {
 				$this->fields[] = is_array($elem) ? $elem['name'] : $elem;
 			}
 		}
 		else {  // comma-delimited string of element names
-			$this->fields = explode(',', $params['elems']);
+			$this->fields = explode(',', $elems);
 		}
 		return;
     }
@@ -136,9 +141,10 @@ implements Countable, Iterator
 
 class ACIS_StnDataResult extends _ACIS_DataResult
 {
-	public function __construct($params, $result)
+	public function __construct($query)
 	{
-		parent::__construct($params);
+		parent::__construct($query);
+        $result = $query['result'];
 		if (!array_key_exists('uid', $result['meta'])) {
 			throw new ACIS_ParameterError('metadata does not contain uid');
 		}
@@ -170,10 +176,10 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 {
     private $_dateIter;
 
-	public function __construct($params, $result)
+	public function __construct($query)
 	{
-		parent::__construct($params);
-        foreach ($result['data'] as $site) {
+		parent::__construct($query);
+        foreach ($query['result']['data'] as $site) {
 			if (!array_key_exists('uid', $site['meta'])) {
 				throw new ACIS_ParameterError('metadata does not contain uid');
 			}
@@ -186,7 +192,7 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 					                              $site['smry']);
 			}
       	}
-		$this->_dateIter = new ArrayIterator(ACIS_date_range($params));
+		$this->_dateIter = new ArrayIterator(ACIS_dateRange($query['params']));
         return;
     }
 

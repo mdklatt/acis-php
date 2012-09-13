@@ -14,3 +14,10 @@ php:
 # Test script
 
 script: php -f test/test_acis.php
+
+
+# Branch restrictions
+
+branches:
+    only:
+        - master

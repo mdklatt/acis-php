@@ -14,7 +14,7 @@
  *   <http://data.rcc-acis.org/doc/>.
  */ 
 require_once 'call.php';
-require_once 'error.php';
+require_once 'exception.php';
 
 
 /**
@@ -67,7 +67,7 @@ implements Iterator
     public function interval($value)
     {
     	if (!in_array($value, array('dly', 'mly', 'yly'))) {
-			throw ACIS_ParameterError("invalid interval: {$value}");
+			throw new ACIS_ParameterError("invalid interval: {$value}");
 		}
 		$this->_interval = $value;
 		return;
@@ -143,11 +143,11 @@ implements Iterator
 		$this->_stream = $call($this->_params);
 		$this->next();
 		if (!$this->_stream) {
-			throw Exception("error reading from stream");
+			throw new Exception("error reading from stream");
 		}
 		if (substr($this->_current, 0, strlen("error")) === "error") {
 			list(, $message) = explode(':', $this->_current, 2);
-			throw ACIS_RequestError(trim($message));
+			throw new ACIS_RequestError(trim($message));
 		}
 		$this->_header();
 		return;
@@ -232,7 +232,7 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
 				return;
 			}
 		}
-		throw ACIS_RequestError('StnDataStream requires uid or sid');
+		throw new ACIS_RequestError('StnData requires uid or sid');
 	 }
 	
 	/**      

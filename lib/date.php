@@ -1,7 +1,5 @@
 <?php
 
-require_once 'error.php';
-
 function ACIS_dateObject($dateStr)
 {
     $date_regex = '/^(\d{4})(?:-?(\d{2}))?(?:-?(\d{2}))?$/';
@@ -37,7 +35,7 @@ function ACIS_dateRange($params)
         return array($params['date']);  # single date
     }
     else {
-        throw new ACIS_ParameterError('invalid date range specification');
+        throw new Exception('invalid date range specification');
     }
     $elems = $params['elems'];
 	if (is_array($elems) && array_key_exists('interval', $elems[0])) {

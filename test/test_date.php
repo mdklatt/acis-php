@@ -6,7 +6,7 @@
  * command.
  */
 require_once 'date.php';
-
+require_once 'exception.php';
 
 class DateObjectFunctionTest extends PHPUnit_Framework_TestCase
 {
@@ -162,30 +162,4 @@ class DateRangeFunctionTest extends PHPUnit_Framework_TestCase
 		$dates = array('2011-01-01', '2012-01-01');
 		$this->assertEquals(ACIS_dateRange($params), $dates);
 	}	
-
-	public function testBadParams()
-	{
-		/**
-		 * Test exception for invalid date range specification.
-		 *
-		 */
-		$params = array('sdate' => '2012-01-01', 'elems' => 'mint');
-		$message = 'invalid date range specification';
-		$this->setExpectedException('ACIS_ParameterError', $message);
-		ACIS_dateRange($params);
-		return;
-	}	
 }
-
-/*
-    def test_bad_params(self):
-        """ Test exception for invalid date range specification.
-
-        """
-        params = {"sdate": "2013-01-01", "elems": "mint"}  # no edate
-        with self.assertRaises(ParameterError) as context:
-            list(date_range(params))  # list needed to trigger iteration
-        message = "invalid date range specification"
-        self.assertEqual(context.exception.message, message)
-        return
-*/

@@ -1,16 +1,28 @@
 <?php
 /** 
+ * Execute ACIS Web Services calls.
  *
+ * This is the core library module. The WebServicesCall is all that is needed
+ * to execute an ACIS Web Services call, and can be uses in cases where the
+ * Request, Result, or Stream classes do not have the needed functionality. In 
+ * particular a WebServicesCall is necessary for GridData and General calls.
+ *
+ * This implementation is based on ACIS Web Services Version 2:
+ *     <http://data.rcc-acis.org/doc/>.
  *
  */
-require_once 'error.php';
+require_once 'exception.php';
 
+
+/**
+ * An ACIS Web Services call.
+ *
+ * This class handles the encoding of the params object, the HTTP request and
+ * error handling, and decoding of the returned result.
+ *
+ */
 class ACIS_WebServicesCall
 {
-    /**
-     *
-     *
-     */
     const _SERVER = 'http://data.rcc-acis.org';
     
     public $url;
@@ -35,7 +47,7 @@ class ACIS_WebServicesCall
         }
         $result = json_decode(stream_get_contents($stream), true);
         if (!$result) {
-            throw new ACIS_RequestError('server returned an invalid result');
+            throw new ACIS_ResultException('server returned invalid JSON');
         }
         return $result;
     }
@@ -55,8 +67,11 @@ class ACIS_WebServicesCall
             // This doesn't do the right thing for a "soft 404", e.g. an ISP
             // redirects to a custom error or search page for a DNS lookup
             // failure and returns a 200 (OK) code.
-            if ($code == $HTTP_BAD) {  // plain text error from ACIS server
-                throw new ACIS_RequestError(stream_get_contents($stream));
+            if ($code == $HTTP_BAD) {
+            	// If the ACIS server returns this code it also provides a
+            	// helpful plain text error message.
+                $message = stream_get_contents($stream);
+                throw new ACIS_RequestException($message);
             }
             throw new Exception("HTTP error: {$code} {$message}");
         }

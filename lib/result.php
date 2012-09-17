@@ -1,18 +1,43 @@
 <?php
 /**
+ * Classes for working with ACIS JSON results.
  *
+ * The goal of this module is to provide a common interface regardless of the
+ * call (StnData, MultiStnData, etc.) that generated the result. If the result
+ * contains metadata they will be stored as an array keyed by site identifier.
+ * If a result contains data they will also be stored as an array keyed to the
+ * same identifier used for the metadata. Iterating over a StnData or
+ * MultiStnData result will yield data in the same format.
+ *
+ * These classes are designed to used with their request module counterparts,
+ * this is not mandatory. A current limitation is the handling of "groupby"
+ * results; see the class documentation for specifics. GridData and General
+ * call results are not currently implemented.
+ *
+ * This implementation is based on ACIS Web Services Version 2:
+ *     <http://data.rcc-acis.org/doc/>.
+
+"""
+*/
+require_once 'date.php';
+require_once 'exception.php';
+
+/**
+ * Abstract base class for all result object.
  *
  */
-require_once 'error.php';
-require_once 'date.php';
-
-
 abstract class _ACIS_JsonResult
 {
     protected function __construct($query)
     {
+    	if (!array_key_exists('params', $query)) {
+    		throw new Exception("missing required params value");
+    	}
+    	if (!array_key_exists('result', $query)) {
+    		throw new Exception("missing required result value");
+    	}
         if (array_key_exists('error', $query['result'])) {
-            throw new ACIS_ResultError($query['result']['error']);
+            throw new ACIS_ResultException($query['result']['error']);
         }
         return;
     }
@@ -28,7 +53,8 @@ class ACIS_StnMetaResult extends _ACIS_JsonResult
 		parent::__construct($query);
 		foreach ($query['result']['meta'] as $site) {
 			if (!array_key_exists('uid', $site)) {
-				throw new ACIS_ParameterError('metadata does not contain uid');
+				$message = 'metadata does not contain uid';
+				throw new ACIS_ResultException($message);
 			}
 			$uid = $site['uid'];
 			unset($site['uid']);
@@ -96,6 +122,7 @@ implements Countable, Iterator
 		return $this->data[$this->key()][$this->_dataPos->j];
 
 	}
+
 	public function key()
 	{
 		/* Return the current array key. */
@@ -146,7 +173,8 @@ class ACIS_StnDataResult extends _ACIS_DataResult
 		parent::__construct($query);
         $result = $query['result'];
 		if (!array_key_exists('uid', $result['meta'])) {
-			throw new ACIS_ParameterError('metadata does not contain uid');
+			$message = 'metadata does not contain uid';
+			throw new ACIS_ResultException($message);
 		}
 		$uid = $result['meta']['uid'];
 		unset($result['meta']['uid']);
@@ -181,7 +209,8 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 		parent::__construct($query);
         foreach ($query['result']['data'] as $site) {
 			if (!array_key_exists('uid', $site['meta'])) {
-				throw new ACIS_ParameterError('metadata does not contain uid');
+				$message = 'metadata does not contain uid';
+				throw new ACIS_ResultException($message);
 			}
 			$uid = $site['meta']['uid'];
 			unset ($site['meta']['uid']);
@@ -212,7 +241,7 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 
 	public function next()
 	{
-        // Keep date iterator in sync with data.
+        // Keep date iterator in sync with date.
 		$uid = $this->key();
 		parent::next();
 		if (!$this->valid()) {

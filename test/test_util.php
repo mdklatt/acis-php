@@ -8,7 +8,7 @@
 require_once 'util.php';
 
 
-class SidsTypesFunctionTEst extends PHPUnit_Framework_TestCase
+class SidsTypesFunctionTest extends PHPUnit_Framework_TestCase
 {
 	public function testNormal()
 	{

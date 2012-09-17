@@ -5,7 +5,6 @@
  * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
  * command.
  */
-require_once 'error.php';
 require_once 'request.php';
 
 

@@ -5,7 +5,7 @@
  * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
  * command.
  */
-require_once 'error.php';
+require_once 'exception.php';
 require_once 'result.php';
 
 
@@ -125,7 +125,7 @@ class StnMetaResultTest extends _MetaResultTest
     public function testNoUid()
     {
     	$message = 'metadata does not contain uid';
-		$this->setExpectedException('ACIS_ParameterError', $message);
+		$this->setExpectedException('ACIS_ResultException', $message);
         unset($this->_query['result']['meta'][0]['uid']);
         new $this->_RESULT_CLASS($this->_query);
     	return;
@@ -141,7 +141,7 @@ class StnDataResultTest extends _DataResultTest
     public function testNoUid()
     {
     	$message = 'metadata does not contain uid';
-		$this->setExpectedException('ACIS_ParameterError', $message);
+		$this->setExpectedException('ACIS_ResultException', $message);
         unset($this->_query['result']['meta']['uid']);
         new $this->_RESULT_CLASS($this->_query);
         return;
@@ -157,7 +157,7 @@ class MultiStnDataResultTest extends _DataResultTest
     public function testNoUid()
     {
     	$message = 'metadata does not contain uid';
-		$this->setExpectedException('ACIS_ParameterError', $message);
+		$this->setExpectedException('ACIS_ResultException', $message);
         unset ($this->_query['result']['data'][0]['meta']['uid']);
         new $this->_RESULT_CLASS($this->_query);
         return;

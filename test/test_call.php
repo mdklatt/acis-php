@@ -6,7 +6,7 @@
  * command.
  */
 require_once 'call.php';
-require_once 'error.php';
+require_once 'exception.php';
 
 
 class WebServicesCallTEstTest extends PHPUnit_Framework_TestCase
@@ -35,10 +35,10 @@ class WebServicesCallTEstTest extends PHPUnit_Framework_TestCase
         return;
     }
 
-    public function testError()
+    public function testException()
     {
     	$call = $this->_call;
-		$this->setExpectedException('ACIS_RequestError', 'Need sId');
+		$this->setExpectedException('ACIS_RequestException', 'Need sId');
         $call(array());
         return;
     }

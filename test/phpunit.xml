@@ -4,9 +4,10 @@
 		<testsuite name="acis">
 			<file>test_call.php</file>
 			<file>test_date.php</file>
-			<file>test_error.php</file>
+			<file>test_exception.php</file>
 			<file>test_request.php</file>
 			<file>test_result.php</file>
+			<file>test_stream.php</file>
 			<file>test_util.php</file>
 		</testsuite>
 	</testsuites>

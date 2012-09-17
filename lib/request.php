@@ -1,18 +1,29 @@
 <?php
 /**
+ * Classes for ACIS data requests.
  *
+ * This module provides a uniform interface for constructing an ACIS data
+ * request and retrieving the result from the server. There is a class for each
+ * type of web services call (StnData, MultiStnData, etc).
+ *
+ * These classes are designed to be used with their result module counterparts,
+ * but this is not mandatory. GridData and General calls are not currently
+ * implemented; use a WebServicesCall instead (see the call module).
+ *
+ * This implementation is based on ACIS Web Services Version 2:
+ *     <http://data.rcc-acis.org/doc/>.
  *
  */
 require_once 'call.php';
-require_once 'error.php';
+require_once 'exception.php';
 
 
+/**
+ * Abstract base class for all request objects.
+ *
+ */
 abstract class _ACIS_JsonRequest
 {
-    /**
-     *
-     *
-     */
     protected $_params = array('output' => 'json');
 
     protected $_call;
@@ -71,7 +82,7 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
 
     public function submit()
     {
-        foreach ($this->_params['elems'] as $elem) {
+        foreach ($this->_params['elems'] as &$elem) {
             $elem['interval'] = $this->_interval;
         }
         return parent::submit();
@@ -98,7 +109,7 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
     public function interval($value)
     {
     	if (!in_array($value, array('dly', 'mly', 'yly'))) {
-			throw ACIS_ParameterError("invalid interval: {$interval}");
+			throw new ACIS_RequestError("invalid interval: {$value}");
 		}
 		$this->_interval = $value;
 		return;
@@ -134,7 +145,7 @@ class ACIS_StnMetaRequest extends _ACIS_MetaRequest
     public function __construct()
     {
         parent::__construct('StnMeta');
-        return;
+        return $this;
     }
 }
 
@@ -144,13 +155,14 @@ class ACIS_StnDataRequest extends _ACIS_DataRequest
     public function __construct()
     {
         parent::__construct('StnData');
-        return;
+        return $this;
     }
 
-    public function location($options) {
+    public function location($options)
+    {
         // Do additional validation.
         if (!array_diff($options, array('uid', 'sid'))) {
-            throw ACIS_ParameterError('invalid location option');
+            throw new ACIS_RequestError('StnData requires uid or sid');
         }
         parent::location($options);
         return;
@@ -170,7 +182,7 @@ class ACIS_MultiStnDataRequest extends _ACIS_DataRequest
 	{
         // Do additional validation.
 		if (strtolower($sdate) == 'por' || strtolower($edate) == 'por') {
-			throw ACIS_ParameterError('MultStnData does not support POR');
+			throw new ACIS_RequestError('MultStnData does not support POR');
 		}
         parent::dates($sdate, $edate);
 		return;

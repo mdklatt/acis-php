@@ -64,9 +64,9 @@ abstract class _DataResultTest extends _MetaResultTest
         $this->_data = $testData['data'];
         $this->_smry = $testData['smry'];
         $this->_records = $testData['records'];
-        $this->_fields = array();
+        $this->_elems = array();
         foreach ($this->_query['params']['elems'] as $elem) {
-            $this->_fields[] = $elem['name'];
+            $this->_elems[] = $elem['name'];
         }
         return;
     }
@@ -83,17 +83,14 @@ abstract class _DataResultTest extends _MetaResultTest
     public function testSmry()
     {
         $result = new $this->_RESULT_CLASS($this->_query);
-        foreach ($result->smry as $uid => $smry) {
-            $record = array_combine($this->_fields, $this->_smry[$uid]);
-            $this->assertEquals($smry, $record);
-        }
+        $this->assertEquals($this->_smry, $result->smry);
         return;
     }
 
-    public function testFields()
+    public function testElems()
     {
         $result = new $this->_RESULT_CLASS($this->_query);
-        $this->assertEquals($result->fields, $this->_fields);
+        $this->assertEquals($this->_elems, $result->elems);
     }
 
     public function testCount()
@@ -104,12 +101,10 @@ abstract class _DataResultTest extends _MetaResultTest
 
     public function testIter()
     {
-        $fields = array_merge(array('uid', 'date'), $this->_fields);
         $result = new $this->_RESULT_CLASS($this->_query);
         $i = 0;
         foreach ($result as $record) {
-            $this->assertEquals($record, 
-            		array_combine($fields, $this->_records[$i]));
+            $this->assertEquals($this->_records[$i], $record);
             ++$i;
         }
         return;

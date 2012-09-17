@@ -16,9 +16,8 @@
  *
  * This implementation is based on ACIS Web Services Version 2:
  *     <http://data.rcc-acis.org/doc/>.
-
-"""
-*/
+ *
+ */
 require_once 'date.php';
 require_once 'exception.php';
 
@@ -83,11 +82,11 @@ implements Countable, Iterator
 		$elems = $query['params']['elems'];
 		if (is_array($elems)) {
 			foreach ($elems as $elem) {
-				$this->fields[] = is_array($elem) ? $elem['name'] : $elem;
+				$this->elems[] = is_array($elem) ? $elem['name'] : $elem;
 			}
 		}
 		else {  // comma-delimited string of element names
-			$this->fields = explode(',', $elems);
+			$this->elems = explode(',', $elems);
 		}
 		return;
     }
@@ -181,7 +180,7 @@ class ACIS_StnDataResult extends _ACIS_DataResult
 		$this->meta[$uid] = $result['meta'];
 		$this->data[$uid] = $result['data'];
 		if (array_key_exists('smry', $result)) {
-			$this->smry[$uid] =  array_combine($this->fields, $result['smry']);
+			$this->smry[$uid] = $result['smry'];
 		}
 		return;
 	}
@@ -193,9 +192,8 @@ class ACIS_StnDataResult extends _ACIS_DataResult
 		if (!($record = parent::current())) {
 			return null;
 		}
-		$fields = array_merge(array('uid', 'date'), $this->fields);
 		array_unshift($record, $this->key());  // prepend uid
-		return array_combine($fields, $record);
+		return $record;
 	}
 }
 
@@ -217,26 +215,21 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 			$this->meta[$uid] = $site['meta'];
 			$this->data[$uid] = $site['data'];
 			if (array_key_exists('smry', $site)) {
-				$this->smry[$uid] = array_combine($this->fields,
-					                              $site['smry']);
+				$this->smry[$uid] = $site['smry'];
 			}
       	}
 		$this->_dateIter = new ArrayIterator(ACIS_dateRange($query['params']));
         return;
     }
 
-
 	public function current()
 	{
-        /* Return the current record as an associative array. */
-
         if (!($record = parent::current())) {
 			return null;
 		}
-		$fields = array_merge(array('uid', 'date'), $this->fields);
 		array_unshift($record, $this->_dateIter->current());
 		array_unshift($record, $this->key());
-        return array_combine($fields, $record);
+        return $record;
 	}
 
 	public function next()

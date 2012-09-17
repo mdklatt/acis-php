@@ -36,8 +36,7 @@ abstract class _ACIS_JsonRequest
 
     public function submit()
     {
-    	$call = $this->_call;
-        $result = $call($this->_params);
+        $result = $this->_call->execute($this->_params);
         return array('params' => $this->_params, 'result' => $result);
     }
 }

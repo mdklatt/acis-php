@@ -34,13 +34,33 @@ class ACIS_WebServicesCall
         return;
     }
 
-    public function __invoke($params)
+	/**
+     * Execute a web services call.
+     *
+     * This is a syntactic shortcut for invoking execute() as a functor, i.e. 
+     * $obj($params) => $obj->execute($params). 
+     */
+	public function __invoke($params)
+	{
+		return $this->execute($params);
+	}
+
+	/**
+	 * Execute a web services call.
+     *
+	 * The params parameter is an associative array specifying the call 
+	 * parameters. The result depends on the output type specified in params. 
+	 * JSON output (the default) gets decoded and returned as an associative
+	 * array, and for all other output types a stream resource gets returned.
+     *
+	 */
+    public function execute($params)
     {
         $json_flag = !empty($params) ? 0 : JSON_FORCE_OBJECT;
         if (!($json = json_encode($params, $json_flag))) {
             throw Exception('JSON encoding for params failed');
         } 
-        $stream = $this->_post(http_build_query(array("params" => $json)));
+        $stream = $this->_post(http_build_query(array('params' => $json)));
         if (array_key_exists('output', $params) && 
                 strtolower($params['output']) != 'json') {
             return $stream;

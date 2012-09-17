@@ -139,8 +139,7 @@ implements Iterator
         foreach ($this->_params['elems'] as &$elem) {
             $elem['interval'] = $this->_interval;
         }
-		$call = $this->_call;  // workaround for syntax limitations
-		$this->_stream = $call($this->_params);
+		$this->_stream = $this->_call->execute($this->_params);
 		$this->next();
 		if (!$this->_stream) {
 			throw new Exception("error reading from stream");

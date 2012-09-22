@@ -72,6 +72,11 @@ class ACIS_WebServicesCall
         return $result;
     }
     
+    /**
+     * Execute a POST request.
+     *
+     * The data parameter must be a properly encoded and escaped string.
+     */
     private function _post($data)
     {
         $HTTP_OK = 200;

@@ -107,9 +107,6 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
 
     public function interval($value)
     {
-    	if (!in_array($value, array('dly', 'mly', 'yly'))) {
-			throw new ACIS_RequestError("invalid interval: {$value}");
-		}
 		$this->_interval = $value;
 		return;
     }

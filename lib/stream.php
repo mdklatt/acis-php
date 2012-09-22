@@ -66,9 +66,6 @@ implements Iterator
 	 */	
     public function interval($value)
     {
-    	if (!in_array($value, array('dly', 'mly', 'yly'))) {
-			throw new ACIS_ParameterError("invalid interval: {$value}");
-		}
 		$this->_interval = $value;
 		return;
     }

@@ -1,6 +1,5 @@
 <?php
-
-require_once('stream.php');
+require_once 'acis.php';
 
 
 abstract class _StreamTest extends PHPUnit_Framework_TestCase

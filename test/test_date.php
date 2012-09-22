@@ -5,8 +5,8 @@
  * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
  * command.
  */
-require_once 'date.php';
-require_once 'exception.php';
+require_once 'acis.php';
+
 
 class DateObjectFunctionTest extends PHPUnit_Framework_TestCase
 {

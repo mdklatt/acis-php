@@ -5,7 +5,7 @@
  * The tests can be executed using a PHPUnit test runner, e.g. the phpunit
  * command.
  */
-require_once 'request.php';
+require_once 'acis.php';
 
 
 abstract class _RequestTest extends PHPUnit_Framework_TestCase

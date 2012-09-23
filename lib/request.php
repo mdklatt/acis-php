@@ -14,6 +14,7 @@
  *     <http://data.rcc-acis.org/doc/>.
  *
  */
+require_once '_misc.php';
 require_once 'call.php';
 require_once 'exception.php';
 
@@ -51,11 +52,11 @@ abstract class _ACIS_MetaRequest extends _ACIS_JsonRequest
         return;
     }
 
-    public function metadata($items)
+    public function metadata($fields)
     {
         // TODO: Need to validate $items.
-        $items[] = 'uid';  // have to have uid
-        $this->_params['meta'] = array_unique($items);
+        $fields[] = 'uid';  // have to have uid
+        $this->_params['meta'] = array_unique($fields);
         return;
     }
 
@@ -89,19 +90,9 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
 
     public function dates($sdate, $edate=null)
     {
-    	if ($edate == null) {
-			if ($sdate == 'por') {
-				$this->_params['sdate'] = 'por';
-				$this->_params['edate'] = 'por';
-			}
-			else {
-				$this->_params['date'] = $sdate;
-			}
+        foreach (ACIS_dateParams($sdate, $edate) as $key => $value) {
+            $this->_params[$key] = $value;
         }
-		else {
-			$this->_params['sdate'] = $sdate;
-			$this->_params['edate'] = $edate;
-		}
 		return;
     }
 
@@ -158,7 +149,7 @@ class ACIS_StnDataRequest extends _ACIS_DataRequest
     {
         // Do additional validation.
         if (!array_diff($options, array('uid', 'sid'))) {
-            throw new ACIS_RequestError('StnData requires uid or sid');
+            throw new ACIS_RequestException('StnData requires uid or sid');
         }
         parent::location($options);
         return;
@@ -177,8 +168,8 @@ class ACIS_MultiStnDataRequest extends _ACIS_DataRequest
 	public function dates($sdate, $edate=null)
 	{
         // Do additional validation.
-		if (strtolower($sdate) == 'por' || strtolower($edate) == 'por') {
-			throw new ACIS_RequestError('MultStnData does not support POR');
+		if (strcasecmp('por', $sdate) == 0 or strcasecmp('por', $edate) == 0) {
+			throw new ACIS_RequestException('MultStnData does not support POR');
 		}
         parent::dates($sdate, $edate);
 		return;

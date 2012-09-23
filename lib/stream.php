@@ -243,18 +243,8 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
      */
     public function dates($sdate, $edate=null)
     {
-        // TODO: Need to validate dates.
-        if ($edate === null) {
-            if (strtolower($sdate) == "por") {  // period of record
-                $this->_params["sdate"] = $this->_params["edate"] = "por";
-            }
-            else {  # single date
-                $this->_params["date"] = sdate;
-            }
-        }
-        else {
-            $this->_params["sdate"] = $sdate;
-            $this->_params["edate"] = $edate;
+        foreach (ACIS_dateParams($sdate, $edate) as $key => $value) {
+            $this->_params[$key] = $value;
         }
         return;
     }
@@ -317,8 +307,13 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
      */
     public function date($date)
     {
-    	// TODO: Need to validate date.
-        $this->_params['date'] = $date;
+        if (strcasecmp('por', $date) == 0) {
+            var_dump($date);
+            throw new ACIS_RequestException('invalid use of POR');
+        }
+        foreach (ACIS_dateParams($date) as $key => $value) {
+            $this->_params[$key] = $value;
+        }
         return;
     }
     
@@ -339,7 +334,7 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
 		if (is_numeric($elev)) {
 			$this->meta[$sid]['elev'] = (float)$elev;
 		}
-		if (is_numeric($lon) && is_numeric($lat)) {
+		if (is_numeric($lon) and is_numeric($lat)) {
 			$this->meta[$sid]['ll'] = array((float)$lon, (float)$lat);
 		}
 		$record = array_merge(array($sid, $this->_params['date']),

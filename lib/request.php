@@ -23,15 +23,14 @@ require_once 'exception.php';
  * Abstract base class for all request objects.
  *
  */
-abstract class _ACIS_JsonRequest
+abstract class _ACIS_Request
 {
-    protected $_params = array('output' => 'json');
-
     protected $_call;
 
     public function __construct($call_type)
     {
         $this->_call = new ACIS_WebServicesCall($call_type);
+        $this->_params = array();
         return;
     }
 
@@ -40,36 +39,36 @@ abstract class _ACIS_JsonRequest
         $result = $this->_call->execute($this->_params);
         return array('params' => $this->_params, 'result' => $result);
     }
-}
-
-
-abstract class _ACIS_MetaRequest extends _ACIS_JsonRequest
-{
-    public function __construct($call_type)
-    {
-        parent::__construct($call_type);
-        $this->_params['meta'] = array('uid');
-        return;
-    }
-
+    
     public function metadata($fields)
     {
-        // TODO: Need to validate $items.
-        $fields[] = 'uid';  // have to have uid
-        $this->_params['meta'] = array_unique($fields);
-        return;
-    }
-
-    public function location($options)
-    {
-        // TODO: Need to validate $options.
-        $this->_params = array_merge($this->_params, $options);
+        $this->_params["meta"] = array_unique($fields);
         return;
     }
 }
 
 
-abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
+abstract class _ACIS_PlaceTimeRequest extends _ACIS_Request
+{
+    public function location($options)
+    {
+        foreach ($options as $key => $value) {
+            $this->_params[$key] = $value;
+        }
+        return;
+    }
+
+    public function dates($sdate, $edate=null)
+    {
+        foreach (ACIS_dateParams($sdate, $edate) as $key => $value) {
+            $this->_params[$key] = $value;
+        }
+		return;       
+    }
+}
+
+
+abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
 {
     protected $_interval = 'dly';
 
@@ -88,21 +87,13 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
         return parent::submit();
     }
 
-    public function dates($sdate, $edate=null)
-    {
-        foreach (ACIS_dateParams($sdate, $edate) as $key => $value) {
-            $this->_params[$key] = $value;
-        }
-		return;
-    }
-
     public function interval($value)
     {
-		$this->_interval = ACIS_validIinterval($value);
+		$this->_interval = ACIS_validInterval($value);
 		return;
     }
 
-    public function addElement($name, $options)
+    public function addElement($name, $options=array())
     {
         // TODO: Need to validate $options.
         $elem = array_merge(array("name" => $name), $options);
@@ -110,29 +101,35 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
         return;
     }
 
-    public function delElement($name=null)
+    public function clearElements()
     {
-        if ($name === null) {
-            $this->_parms['elems'] = array();
-            return;
-        }
-        for ($pos = 0; $pos < count($this->_params['elems']); ++$pos) {
-            if ($this->_params['elems'][$pos]['name'] == $name) {
-                unset($this->_params['elems'][pos]);
-                break;
-            }
-        }
+        $this->_params['elems'] = array();
         return;
     }
 }
 
 
-class ACIS_StnMetaRequest extends _ACIS_MetaRequest
+class ACIS_StnMetaRequest extends _ACIS_PlaceTimeRequest
 {
     public function __construct()
     {
         parent::__construct('StnMeta');
-        return $this;
+        $this->_params['meta'] = array('uid');
+        return;
+    }
+    
+    public function metadata($fields)
+    {
+        // $fields is a string or array
+        $fields[] = 'uid';
+        parent::metadata($fields);
+        return;
+    }
+
+    public function elements($names)
+    {
+        // $names is a string or array
+        $this->_params['elems'] = $names;
     }
 }
 
@@ -142,16 +139,15 @@ class ACIS_StnDataRequest extends _ACIS_DataRequest
     public function __construct()
     {
         parent::__construct('StnData');
-        return $this;
+        $this->_params['meta'] = array('uid');
+        return;
     }
-
-    public function location($options)
+    
+    public function metadata($fields)
     {
-        // Do additional validation.
-        if (!array_diff($options, array('uid', 'sid'))) {
-            throw new ACIS_RequestException('StnData requires uid or sid');
-        }
-        parent::location($options);
+        // $fields is a string or array
+        $fields[] = 'uid';
+        parent::metadata($fields);
         return;
     }
 }
@@ -165,13 +161,63 @@ class ACIS_MultiStnDataRequest extends _ACIS_DataRequest
         return;
     }
 
+    public function metadata($fields)
+    {
+        // $fields is a string or array
+        $fields[] = 'uid';
+        parent::metadata($fields);
+        return;
+    }
+
 	public function dates($sdate, $edate=null)
 	{
         // Do additional validation.
 		if (strcasecmp('por', $sdate) == 0 or strcasecmp('por', $edate) == 0) {
-			throw new ACIS_RequestException('MultStnData does not support POR');
+			throw new ACIS_RequestException('MultStnData does not accept POR');
 		}
         parent::dates($sdate, $edate);
 		return;
 	}
+}
+
+
+// Development versions--not part of public interface yet.
+
+class ACIS_GridData extends _ACIS_DataRequest
+{
+    public function __construct()
+    {
+        parent::__construct('GridData');
+        return;
+    }
+ 
+    public function grid($id)
+    {
+        $this->_params['grid'] = $id;
+        return;
+    }
+}
+
+
+class ACIS_GeneralRequest extends _ACIS_Request
+{
+    public function __construct($area)
+    {
+        parent::__construct("General/{$area}");
+        $this->_params['meta'] = 'id';
+        return;
+    }
+
+    public function metadata($fields)
+    {
+        // $fields is a string or array
+        $fields[] = 'id';
+        parent::metadata($fields);
+        return;
+    }
+    
+    public function state($postal)
+    {
+        $this->_params['state'] = $postal;
+    }
 }

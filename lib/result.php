@@ -205,7 +205,7 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 	public function __construct($query)
 	{
 		parent::__construct($query);
-        foreach ($query['result']['data'] as $site) {
+        foreach ($query['result']['data'] as $site) {  // construct meta
 			if (!array_key_exists('uid', $site['meta'])) {
 				$message = 'metadata does not contain uid';
 				throw new ACIS_ResultException($message);
@@ -218,7 +218,9 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 				$this->smry[$uid] = $site['smry'];
 			}
       	}
-		$this->_dateIter = new ArrayIterator(ACIS_dateRange($query['params']));
+        list($sdate, $edate, $interval) = ACIS_dateSpan($query['params']);
+        $dates = ACIS_dateRange($sdate, $edate, $interval);
+		$this->_dateIter = new ArrayIterator($dates);
         return;
     }
 

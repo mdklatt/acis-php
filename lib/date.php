@@ -19,17 +19,17 @@
  * zeroes are not; no two-digit years).
  *
  */
-function ACIS_dateObject($dateStr)
+ define('ACIS_DATE_REGEX', '/^(\d{4})(?:-?(\d{2}))?(?:-?(\d{2}))?$/');
+
+
+function ACIS_dateObject($date)
 {
-    $date_regex = '/^(\d{4})(?:-?(\d{2}))?(?:-?(\d{2}))?$/';
-    if (preg_match($date_regex, $dateStr, $matches)) {
-		$yr = $matches[1];
-		$mo = count($matches) >= 3 ? $matches[2] : 1;
-		$da = count($matches) >= 4 ? $matches[3] : 1;
-	}
-    else {
-        throw new Exception('invalid date format');
+    if (!preg_match(ACIS_DATE_REGEX, $date, $matches)) {
+        throw new Exception("invalid date: {$date}");
     }
+	$yr = (int)$matches[1];
+	$mo = count($matches) >= 3 ? $matches[2] : 1;
+	$da = count($matches) >= 4 ? $matches[3] : 1;
 	$date = new DateTime();
 	$date->setDate($yr, $mo, $da);
 	$date->setTime(0, 0, 0);
@@ -40,21 +40,18 @@ function ACIS_dateObject($dateStr)
  * Return an ACIS-format date string from a DateTime object.
  *
  */
-function ACIS_dateString($dateObj)
+function ACIS_dateString($date)
 {
-   return $dateObj->format('Y-m-d');
+   return $date->format('Y-m-d');
 }
 
 /**
  * Determine the date delta for an interval.
  *
- * An interval can be a name ("dly", "mly", "yly") or a (yr, mo, da) value
- * given as a list/tuple or comma-delimited string. For (yr, mo, da) the least
- * significant nonzero value sets the interval, e.g. "0, 3, 0" is an interval
- * of 3 months.
+ * An interval can be a name ("dly", "mly", "yly") or a (yr, mo, da) array.
  * 
  */
- function _ACIS_dateDelta($interval)
+ function ACIS_dateDelta($interval)
 {
     $named_deltas = array(
         'dly' => array(0, 0, 1),
@@ -62,28 +59,44 @@ function ACIS_dateString($dateObj)
         'yly' => array(1, 0, 0),
     );
     if (is_string($interval)) {
-        if (array_key_exists($interval, $named_deltas)) {
-            list($yr, $mo, $da) = $named_deltas[$interval];        
-        }
-        else {  // comma-delimited string?
-            list($yr, $mo, $da) = explode(',', $interval);
+        if (($interval = @$named_deltas[$interval]) === null) {
+            throw Exception("unknown interval: {$interval}");            
         }
     }
-    elseif (is_array($interval)) {
-        list($yr, $mo, $da) = $interval;
-    }
-    else {
-        throw new Exception("invalid interval specification: {$interval}");
-    } 
-    $da = (int)$da;
-    $mo = $da > 0 ? 0 : (int)$mo;
-    $yr = ($mo > 0 or $da > 0) ? 0 : (int)$yr;
+    list($yr, $mo, $da) = $interval;
     return "+{$yr} years, +{$mo} months, +{$da} days"; 
 }
 
 
 /**
- * Return an array of dates for the date range specified by params.
+ * Truncate a date to a defined precision.
+ *
+ * The only interval that have an effect are "yly" and "mly". For all other
+ * intervals, include (y, m d) arrays, the precision daily.
+ *
+ */
+function ACIS_dateTrunc($date, $interval)
+{
+    if (!preg_match(ACIS_DATE_REGEX, $date, $matches)) {
+        throw new Exception("invalid date: {$date}");
+    }
+    $precision = array('yly' => 1, 'mly' => 2);    
+    if (($prec = @$precision[$interval]) === null) {
+        $prec = 3;
+    }
+    $date = array($matches[1]);
+    if ($prec >= 2) {  // month
+        $date[] = count($matches) >= 3 ? $matches[2] : "01";
+    }
+    if ($prec == 3) {  // day
+        $date[] = count($matches) >= 4 ? $matches[3] : "01";
+    }
+    return implode('-', $date);
+}
+
+
+/**
+ * Return an array of dates.
  *
  * The params parameter is an array of options defining an ACIS call. The
  * returned date range will be the dates for a result returned by that
@@ -93,31 +106,16 @@ function ACIS_dateString($dateObj)
  * BE CORRECT.
  *
  */
-function ACIS_dateRange($params)
-{
-    if (array_key_exists('sdate', $params) and
-            array_key_exists('edate', $params)) {
-        $sdate = ACIS_dateObject($params['sdate']);
-        $edate = ACIS_dateObject($params['edate']);
-    }
-    else if (array_key_exists('date', $params)) {
-        return array($params['date']);  # single date
-    }
-    else {
-        throw new Exception('invalid date range specification');
-    }
-    $elems = $params['elems'];
-	if (is_array($elems) and array_key_exists('interval', $elems[0])) {
-		$interval = $elems[0]['interval'];
-	}
-	else {
-		$interval = 'dly';
-	}
-    $range = array();
-    $delta = _ACIS_dateDelta($interval);
-    while ($sdate <= $edate) {
-        $range[] = ACIS_dateString($sdate);
-        $sdate->modify($delta);
-    }
-    return $range;
-}
+ function ACIS_dateRange($sdate, $edate=null, $interval="dly")
+ {
+     $edate = $edate == null ? $sdate : $edate ;
+     $sdate = ACIS_dateObject(ACIS_dateTrunc($sdate, $interval));
+     $edate = ACIS_dateObject(ACIS_dateTrunc($edate, $interval));
+     $delta = ACIS_dateDelta($interval);
+     $range = array();
+     while ($sdate <= $edate) {
+         $range[] = ACIS_dateTrunc(ACIS_dateString($sdate), $interval);
+         $sdate->modify($delta);
+     }
+     return $range;
+ }

@@ -66,7 +66,7 @@ implements Iterator
 	 */	
     public function interval($value)
     {
-		$this->_interval = $value;
+		$this->_interval = ACIS_validInterval($value);
 		return;
     }
 

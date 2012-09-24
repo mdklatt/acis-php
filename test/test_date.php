@@ -109,152 +109,138 @@ class DateStringFunctionTest extends PHPUnit_Framework_TestCase
 
 
 /**
+ * Unit testing for the ACIS_dateTrunc function.
+ *
+ */
+class DateTruncFunctionTest extends PHPUnit_Framework_TestCase
+{
+    /**
+     * Test "mly" interval.
+     *
+     */
+    public function testMly()
+    {
+        $this->assertEquals('2011-12', ACIS_dateTrunc('20111215', 'mly'));
+        $this->assertEquals('2011-12', ACIS_dateTrunc('2011-12-15', 'mly'));
+        $this->assertEquals('2011-12', ACIS_dateTrunc('2011-12', 'mly'));
+        $this->assertEquals('2011-01', ACIS_dateTrunc('2011', 'mly'));
+        return;       
+    }
+
+    /**
+     * Test "yly" interval.
+     *
+     */
+    public function testYly()
+    {
+        $this->assertEquals('2011', ACIS_dateTrunc('20111215', 'yly'));
+        $this->assertEquals('2011', ACIS_dateTrunc('2011-12-15', 'yly'));
+        $this->assertEquals('2011', ACIS_dateTrunc('2011-12', 'yly'));
+        $this->assertEquals('2011', ACIS_dateTrunc('2011', 'yly'));
+        return;       
+    }
+
+    /**
+     * Test "yly" interval.
+     *
+     */
+    public function testOther()
+    {
+        $this->assertEquals('2011-12-15', ACIS_dateTrunc('2011-12-15', 
+                array(0, 1, 0)));
+        return;
+    }
+    
+}
+
+/**
  * Unit testing for the ACIS_dateRange function.
  *
  */
 class DateRangeFunctionTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * Test a default daily interval.
+     * Test a daily default interval.
      *
      */
-    public function testDefault()
+    public function testDefaults()
     {
-        $params = array('sdate' => '2011-12-31', 'edate' => '2012-01-01', 
-            'elems' => 'mint');
-        $dates = array('2011-12-31', '2012-01-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011-12-31');
+        $actual = ACIS_dateRange('2011-12-31');
+        $this->assertEquals($expected, $actual);
+        return;
     }   
 
     /**
-     * Test a daily interval 'dly'.
+     * Test interval 'dly'.
      *
      */
     public function testDailyStr()
     {
-        $params = array('sdate' => '2011-12-31', 'edate' => '2012-01-01',
-                'elems' => array(array('interval' => 'dly')));
-        $dates = array('2011-12-31', '2012-01-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011-12-31', '2012-01-01', '2012-01-02');
+        $actual = ACIS_dateRange('2011-12-31', '2012-01-02', 'dly');
+        $this->assertEquals($expected, $actual);
+        return;
     }   
     
     /**
-     * Test daily interval '0, 0, 2'.
+     * Test interval array(0, 0, 2).
      *
      */
-    public function testDailyYmdStr()
+    public function testDailyYmd()
     {
-        $params = array('sdate' => '2011-12-31', 'edate' => '2012-01-05',
-                'elems' => array(array('interval' => '0, 0, 2')));
-        $dates = array('2011-12-31', '2012-01-02', '2012-01-04');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011-12-31', '2012-01-02', '2012-01-04');
+        $actual = ACIS_dateRange('2011-12-31', '2012-01-04', array(0, 0, 2));
+        $this->assertEquals($expected, $actual);
+        return;
     }
 
     /**
-     * Test daily interval array(0, 0, 2).
-     *
-     */
-    public function testDailyYmdArr()
-    {
-        $params = array('sdate' => '2011-12-31', 'edate' => '2012-01-05',
-                'elems' => array(array('interval' => array(0, 0, 2))));
-        $dates = array('2011-12-31', '2012-01-02', '2012-01-04');
-        $this->assertEquals($dates, ACIS_dateRange($params));
-    }
-
-    /**
-     * Test monthly interval "mly".
+     * Test interval "mly".
      *
      */
     public function testMonthlyStr()
     {
-        $params = array('sdate' => '2011-12', 'edate' => '2012-01',
-            'elems' => array(array('interval' => 'mly')));
-        $dates = array('2011-12-01', '2012-01-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011-12', '2012-01', '2012-02');
+        $actual = ACIS_dateRange('2011-12-15', '2012-02-15', 'mly');
+        $this->assertEquals($expected, $actual);
+        return;
     }   
 
+
     /**
-     * Test monthly interval '0, 2, 0'.
+     * Test interval array(0, 2, 0).
      *
      */
-    public function testMonthlyYmdStr()
+    public function testMonthlyYmd()
     {
-        $params = array('sdate' => '2011-12', 'edate' => '2012-05',
-            'elems' => array(array('interval' => '0, 2, 0')));
-        $dates = array('2011-12-01', '2012-02-01', '2012-04-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011-12-15', '2012-02-15', '2012-04-15');
+        $actual = ACIS_dateRange('2011-12-15', '2012-04-15', array(0, 2, 0));
+        $this->assertEquals($expected, $actual);
+        return;
     }   
 
     /**
-     * Test monthly interval array(0, 2, 0).
-     *
-     */
-    public function testMonthlyYmdArr()
-    {
-        $params = array('sdate' => '2011-12', 'edate' => '2012-05',
-            'elems' => array(array('interval' => array(0, 2, 0))));
-        $dates = array('2011-12-01', '2012-02-01', '2012-04-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
-    }   
-
-    /**
-     * Test a yearly interval 'yly'.
+     * Test interval 'yly'.
      *
      */
     public function testYearlyStr()
     {
-        $params = array('sdate' => '2011', 'edate' => '2012',
-            'elems' => array(array('interval' => 'yly')));
-        $dates = array('2011-01-01', '2012-01-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011', '2012', '2013');
+        $actual = ACIS_dateRange('2011-12-15', '2013-12-15', 'yly');
+        $this->assertEquals($expected, $actual);
+        return;
     }   
 
     /**
-     * Test a yearly interval '2, 0, 0'.
+     * Test interval array(2, 0, 0).
      *
      */
-    public function testYearlyYmdStr()
+    public function testYearlyYmd()
     {
-        $params = array('sdate' => '2011', 'edate' => '2016',
-            'elems' => array(array('interval' => '2, 0, 0')));
-        $dates = array('2011-01-01', '2013-01-01', '2015-01-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
+        $expected = array('2011-12-15', '2013-12-15', '2015-12-15');
+        $actual = ACIS_dateRange('2011-12-15', '2015-12-15', array(2, 0, 0));
+        $this->assertEquals($expected, $actual);
+        return;
     }   
-
-    /**
-     * Test a yearly interval array(2, 0, 0).
-     *
-     */
-    public function testYearlyYmdArr()
-    {
-        $params = array('sdate' => '2011', 'edate' => '2016',
-            'elems' => array(array('interval' => array(2, 0, 0))));
-        $dates = array('2011-01-01', '2013-01-01', '2015-01-01');
-        $this->assertEquals($dates, ACIS_dateRange($params));
-    }   
-
-    /**
-     * Test that y, m, d specifications are mutually exclusive.
-     *
-     * The least significant place take precedence.
-     */
-    public function testYmdMutex()
-    {
-        $params = array('sdate' => '2011-01-01', 'edate' => '2011-02-02',
-                'elems' => array(array('interval' => '0, 1, 1')));
-        $dates = array('2011-01-01', '2011-01-02');
-        $this->assertEquals($dates, array_slice(ACIS_dateRange($params), 
-            0, 2));
-        $params = array('sdate' => '2011-01-01', 'edate' => '2012-02-01',
-                'elems' => array(array('interval' => '1, 1, 0')));
-        $dates = array('2011-01-01', '2011-02-01');
-        $this->assertEquals($dates, array_slice(ACIS_dateRange($params), 
-            0, 2));
-        $params = array('sdate' => '2011-01-01', 'edate' => '2012-01-02',
-                'elems' => array(array('interval' => '1, 0, 1')));
-        $dates = array('2011-01-01', '2011-01-02');
-        $this->assertEquals($dates, array_slice(ACIS_dateRange($params), 
-            0, 2));
-    }
 }

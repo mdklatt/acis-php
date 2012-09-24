@@ -98,7 +98,7 @@ abstract class _ACIS_DataRequest extends _ACIS_MetaRequest
 
     public function interval($value)
     {
-		$this->_interval = $value;
+		$this->_interval = ACIS_validIinterval($value);
 		return;
     }
 

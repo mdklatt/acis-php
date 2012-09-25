@@ -34,26 +34,26 @@ class ACIS_WebServicesCall
         return;
     }
 
-	/**
+    /**
      * Execute a web services call.
      *
      * This is a syntactic shortcut for invoking execute() as a functor, i.e. 
      * $obj($params) => $obj->execute($params). 
      */
-	public function __invoke($params)
-	{
-		return $this->execute($params);
-	}
+    public function __invoke($params)
+    {
+        return $this->execute($params);
+    }
 
-	/**
-	 * Execute a web services call.
+    /**
+     * Execute a web services call.
      *
-	 * The params parameter is an associative array specifying the call 
-	 * parameters. The result depends on the output type specified in params. 
-	 * JSON output (the default) gets decoded and returned as an associative
-	 * array, and for all other output types a stream resource gets returned.
+     * The params parameter is an associative array specifying the call 
+     * parameters. The result depends on the output type specified in params. 
+     * JSON output (the default) gets decoded and returned as an associative
+     * array, and for all other output types a stream resource gets returned.
      *
-	 */
+     */
     public function execute($params)
     {
         $json_flag = !empty($params) ? 0 : JSON_FORCE_OBJECT;
@@ -93,8 +93,8 @@ class ACIS_WebServicesCall
             // redirects to a custom error or search page for a DNS lookup
             // failure and returns a 200 (OK) code.
             if ($code == $HTTP_BAD) {
-            	// If the ACIS server returns this code it also provides a
-            	// helpful plain text error message.
+                // If the ACIS server returns this code it also provides a
+                // helpful plain text error message.
                 $message = stream_get_contents($stream);
                 throw new ACIS_RequestException($message);
             }

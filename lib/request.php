@@ -63,7 +63,7 @@ abstract class _ACIS_PlaceTimeRequest extends _ACIS_Request
         foreach (ACIS_dateParams($sdate, $edate) as $key => $value) {
             $this->_params[$key] = $value;
         }
-		return;       
+        return;       
     }
 }
 
@@ -89,8 +89,8 @@ abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
 
     public function interval($value)
     {
-		$this->_interval = ACIS_validInterval($value);
-		return;
+        $this->_interval = ACIS_validInterval($value);
+        return;
     }
 
     public function addElement($name, $options=array())
@@ -169,15 +169,15 @@ class ACIS_MultiStnDataRequest extends _ACIS_DataRequest
         return;
     }
 
-	public function dates($sdate, $edate=null)
-	{
+    public function dates($sdate, $edate=null)
+    {
         // Do additional validation.
-		if (strcasecmp('por', $sdate) == 0 or strcasecmp('por', $edate) == 0) {
-			throw new ACIS_RequestException('MultStnData does not accept POR');
-		}
+        if (strcasecmp('por', $sdate) == 0 or strcasecmp('por', $edate) == 0) {
+            throw new ACIS_RequestException('MultStnData does not accept POR');
+        }
         parent::dates($sdate, $edate);
-		return;
-	}
+        return;
+    }
 }
 
 

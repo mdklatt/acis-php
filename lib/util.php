@@ -7,8 +7,8 @@ function ACIS_sidsTypes($sids)
     /* Return an array of site IDs keyed by their decoded ID types. */
     
     $SID_REGEX = '/^([^ ]*) (\d+)$/';
-	$SID_TYPES = array(1=>'WBAN', 'COOP', 'FAA', 'WMO', 'ICAO', 'GHCN',
-    	'NWSLI', 'RCC', 'ThreadEx', 'CoCoRaHS');
+    $SID_TYPES = array(1=>'WBAN', 'COOP', 'FAA', 'WMO', 'ICAO', 'GHCN',
+        'NWSLI', 'RCC', 'ThreadEx', 'CoCoRaHS');
     $types = array();
     foreach ($sids as $sid) {
         if (!preg_match($SID_REGEX, $sid, $matches)) {

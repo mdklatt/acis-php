@@ -27,13 +27,13 @@ function ACIS_dateObject($date)
     if (!preg_match(ACIS_DATE_REGEX, $date, $matches)) {
         throw new Exception("invalid date: {$date}");
     }
-	$yr = (int)$matches[1];
-	$mo = count($matches) >= 3 ? $matches[2] : 1;
-	$da = count($matches) >= 4 ? $matches[3] : 1;
-	$date = new DateTime();
-	$date->setDate($yr, $mo, $da);
-	$date->setTime(0, 0, 0);
-	return $date;
+    $yr = (int)$matches[1];
+    $mo = count($matches) >= 3 ? $matches[2] : 1;
+    $da = count($matches) >= 4 ? $matches[3] : 1;
+    $date = new DateTime();
+    $date->setDate($yr, $mo, $da);
+    $date->setTime(0, 0, 0);
+    return $date;
 }
 
 /**

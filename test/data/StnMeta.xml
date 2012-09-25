@@ -1,0 +1,19 @@
+<TestData>
+	<description></description>
+    <value name="params" dtype="json">
+        {"county":"40109","meta":"uid,name,county","elems":"maxt,mint",
+        "sdate":"1890-01-01","edate":"1907-11-07"}     
+    </value>
+    <value name="result" dtype="json">
+        {"meta":[{"county":"40109","uid":14012,"name":
+        "OKLAHOMA CITY PENN AVE"},{"county":"40109","uid":28780,"name":
+        "EDMOND"},{"county":"40109","uid":38537,"name":"LUTHER"}]}    
+    </value>
+    <value name="meta" dtype="array">
+        array(
+            14012 => array('county' => '40109', 'name' => 'OKLAHOMA CITY PENN AVE'),
+            28780 => array('county' => '40109', 'name' => 'EDMOND'),
+            38537 => array('county' => '40109', 'name' => 'LUTHER'),
+        )
+    </value>
+</TestData>

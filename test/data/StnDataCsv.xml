@@ -1,0 +1,16 @@
+<TestData>
+    <description></description>
+    <value name="params" dtype="json">
+        {"sid":"okc","sdate":"2011-12-31","edate":"2012-01-01",
+         "elems":"mint,maxt","output":"csv"}
+     </value>
+     <value name="records" dtype="array">
+         array(
+             array('okc', '2011-12-31', '35', '71'), 
+             array('okc', '2012-01-01', '34', '50'),
+         )
+     </value>
+     <value name="meta" dtype="array">
+         array('okc' => array('name' => 'OKLAHOMA CITY WILL ROGERS AP'))
+     </value>
+</TestData>

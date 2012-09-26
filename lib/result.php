@@ -27,6 +27,14 @@ require_once 'exception.php';
  */
 abstract class _ACIS_JsonResult
 {
+    private $_elems = array();
+    
+    public function elems()
+    {
+        // For compatibility this is a function instead of an attribute.
+        return $this->_elems;
+    }
+    
     protected function __construct($query)
     {
         if (!array_key_exists('params', $query)) {
@@ -38,6 +46,23 @@ abstract class _ACIS_JsonResult
         if (array_key_exists('error', $query['result'])) {
             throw new ACIS_ResultException($query['result']['error']);
         }
+        
+        // Define elements.
+        if (($elements = @$query['params']['elems']) === null) {
+            return;
+        }
+        if (is_string($elements)) {  // comma-delimited string
+            $elements = explode(',', $elements);
+        }
+        elseif (is_array($elements[0])) {  // element objects
+            foreach ($elements as &$elem) {
+                $elem = $elem['name'];
+            }
+        }
+        foreach ($elements as &$elem) {
+            $elem = trim($elem);
+        }    
+        $this->_elems = ACIS_annotate($elements);
         return;
     }
 }

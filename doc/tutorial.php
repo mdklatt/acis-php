@@ -1,5 +1,5 @@
 <?php
-require_once 'acis-0.1.dev.phar';
+require_once 'acis.phar';
 
 date_default_timezone_set('UTC');  // stop DateTime from complaining
 
@@ -77,13 +77,13 @@ $request->addElement("pcpn", array("reduce" => array("reduce" => "max",
 $request->addElement("pcpn", array("reduce" => "sum"));
 $request->metadata(array("name"));
 $query = $request->submit();
-//list($date, $maxt, $mint, $pcpn_max, $pcpn_sum) = $query["result"]["data"][0];
+list($date, $maxt, $mint, $pcpn_max, $pcpn_sum) = $query["result"]["data"][0];
 list($date, $maxt, $mint, $pcpn_max) = $query["result"]["data"][0];
 print "***{$query["result"]["meta"]["name"]}***".PHP_EOL;
 print "The max temperature of {$maxt[0]}F occurred on {$maxt[1]}.".PHP_EOL;
 print "The min temperature of {$mint[0]}F occurred on {$mint[1]}.".PHP_EOL;
 print "The max daily rainfall of {$pcpn_max[0]}\" occurred on {$pcpn_max[1]}.".PHP_EOL;
-//print "The total rainfall from the month was ${pcpn_sum}\"".PHP_EOL;
+print "The total rainfall from the month was ${pcpn_sum}\"".PHP_EOL;
 print str_repeat('-', 40).PHP_EOL;
 
 

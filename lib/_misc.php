@@ -7,6 +7,24 @@
  require_once 'date.php';
  
  
+function ACIS_annotate($arr)
+{
+    $annotated = array_reverse($arr);
+    foreach(array_count_values($annotated) as $key => $count) {
+        if ($count == 1) {
+            continue;
+        }
+        foreach ($annotated as &$item) {
+            if ($item != $key) {
+                continue;
+            }
+            $item .= --$count;
+        }
+    }
+    return array_reverse($annotated);
+}
+
+
 function ACIS_dateParams($sdate, $edate=null)
 {
     $params = array();

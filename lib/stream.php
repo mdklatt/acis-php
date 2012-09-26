@@ -13,6 +13,7 @@
  * This implementation is based on ACIS Web Services Version 2:
  *   <http://data.rcc-acis.org/doc/>.
  */ 
+require_once '_misc.php';
 require_once 'call.php';
 require_once 'exception.php';
 
@@ -80,7 +81,7 @@ implements Iterator
         foreach ($this->_params['elems'] as $elem) {
             $elem_names[] = $elem['name'];
         }
-        return $elem_names;
+        return ACIS_annotate($elem_names);
     }
     
     /**
@@ -91,15 +92,8 @@ implements Iterator
      */
     public function addElement($name, $options=array())
     {
-        $elements = &$this->_params['elems'];
-        $new_elem = array_merge(array('name' => $name), $options);
-        foreach ($elements as &$elem) {
-            if ($elem['name'] == $name) {
-                $elem = $new_elem;
-                return;
-            }
-        }
-        $elements[] = $new_elem;
+        $elem = array_merge(array('name' => $name), $options);
+        $this->_params['elems'][] = $elem;
         return;
     }
     
@@ -107,20 +101,9 @@ implements Iterator
      * Delete all or just "name" from the request elements.
      *
      */
-    public function delElement($name=null)
+    public function clearElements()
     {
-        $elements = &$this->_params['elems'];
-        if ($name === null) {
-            $elements = array();
-            return;
-        }
-        for ($i = 0; $i < count($elements); ++$i) {
-            if ($elements[$i]['name'] == $name) {
-                unset($elements[$i]);
-                $elements = array_values($elements);  // reindex array
-                return;
-            }
-        }
+        $this->_params['elems'] = array();
         return;
     }   
     
@@ -187,6 +170,7 @@ implements Iterator
      *
      * Each derived class must implement this to return a record of the form
      * (sid, date, elem1, ...).
+     *
      */
     abstract public function current();
 
@@ -195,6 +179,7 @@ implements Iterator
      *
      * This is a required part of the Iterator interface, but keys have no
      * meaning in this context so null is returned.
+     *
      */
     public function key() { return null; }
 }
@@ -262,7 +247,10 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
     }
 
     /**
-     * Process the current line of text from the server.
+     * Process the current line of text.
+     *
+     * Return a record of the form (sid, date, elem1, ...). Not all metadata 
+     * fields are present for all sites.
      *
      */
     public function current()
@@ -308,7 +296,6 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
     public function date($date)
     {
         if (strcasecmp('por', $date) == 0) {
-            var_dump($date);
             throw new ACIS_RequestException('invalid use of POR');
         }
         foreach (ACIS_dateParams($date) as $key => $value) {
@@ -318,23 +305,21 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
     }
     
     /**
-     * Process the current line of text from the server.
+     * Process the current line of text.
      *
-     * The meta attribute will not be fully populated until every line has been
-     * received.
+     * Read the metadata for this site and return a record of the form (sid,
+     * date, elem1, ...). Not all metadata fields are present for all sites.
      *
      */
     public function current()
     {
-        // The metadata for each site--name, state, lat/lon, and elevation--is 
-        // part of its data record.
-        $record = explode(',', $this->_current);
+        $record = explode(',', $this->_current);    
         list($sid, $name, $state, $lon, $lat, $elev) = $record;
         $this->meta[$sid] = array('name' => $name, 'state' => $state);
-        if (is_numeric($elev)) {
+        if ($elev != null) {
             $this->meta[$sid]['elev'] = (float)$elev;
         }
-        if (is_numeric($lon) and is_numeric($lat)) {
+        if ($lon != null and $lat != null) {
             $this->meta[$sid]['ll'] = array((float)$lon, (float)$lat);
         }
         $record = array_merge(array($sid, $this->_params['date']),

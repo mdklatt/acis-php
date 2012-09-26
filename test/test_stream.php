@@ -31,29 +31,18 @@ abstract class _StreamTest extends PHPUnit_Framework_TestCase
 		return;
 	}	
 	
-	public function testAddElement()
+	public function testElems()
 	{
-		$this->_stream->addElement('mint');
-		$this->assertEquals(array('mint'), $this->_stream->elems());
-		$this->_stream->addElement('maxt');
-		$this->assertEquals(array('mint', 'maxt'), $this->_stream->elems());
-		$this->_stream->addElement('mint');  // no duplicates, overwrite
-		$this->assertEquals(array('mint', 'maxt'), $this->_stream->elems());		
-		return;
-	}
-	
-	public function testDelElement()
-	{
+        $this->assertEquals(array(), $this->_stream->elems());        
 		$this->_stream->addElement('mint');
 		$this->_stream->addElement('maxt');
-		$this->_stream->addElement('obst');
-		$this->_stream->delElement('maxt');
-		$this->assertEquals(array('mint', 'obst'), $this->_stream->elems());
-		$this->_stream->delElement('maxt');  // already deleted
-		$this->assertEquals(array('mint', 'obst'), $this->_stream->elems());
-		$this->_stream->delElement();  // delete all
-		$this->assertEquals(array(), $this->_stream->elems());
-		return;
+        $this->assertEquals(array('mint', 'maxt'), $this->_stream->elems());
+        $this->_stream->addElement('mint');  // duplicates ok
+        $this->assertEquals(array('mint0', 'maxt', 'mint1'), 
+                $this->_stream->elems());
+        $this->_stream->clearElements();
+        $this->assertEquals(array(), $this->_stream->elems());        
+        return;
 	}
 }
 
@@ -95,6 +84,6 @@ class MultiStnDataStreamTest extends _StreamTest
             $this->assertEquals($this->_records[$i], $record); 
             ++$i;
         }    	
-        $this->assertEquals($this->_meta, $this->_stream->meta);   	
+        $this->assertEquals($this->_meta, $this->_stream->meta);
     }
 }

@@ -97,13 +97,9 @@ implements Countable, Iterator
     public $smry = array();
     public $fields = array();
 
-    private $_dataPos;
-
     public function __construct($query)
     {
         parent::__construct($query);
-        $this->_dataPos = new stdClass();
-        $this->rewind();  // initialize internal array pointer
         $elems = $query['params']['elems'];
         if (is_array($elems)) {
             foreach ($elems as $elem) {
@@ -136,54 +132,34 @@ implements Countable, Iterator
     // results are not currently supported). Array traversal is column-first.
     // Derived classes must implement the current() method.
 
-    public function current()
+    protected $_siteIter;
+    protected $_dataIter;
+
+    public function key() 
     {
-        /* Return the current array value. */
-
-        if (!$this->valid()) {
-            return null;
-        }
-        return $this->data[$this->key()][$this->_dataPos->j];
-
-    }
-
-    public function key()
-    {
-        /* Return the current array key. */
-
-        if (!$this->valid()) {
-            return null;
-        }
-        $keys = array_keys($this->data);
-        return $keys[$this->_dataPos->i];
+        // The current site UID. 
+        return $this->_siteIter->key();
     }
 
     public function next()
     {
-        /* Set the array position to the next element. */
-
-        if (!$this->valid()) {
-            return;
-        }
-        if (++$this->_dataPos->j >= count($this->data[$this->key()])) {
-            ++$this->_dataPos->i;
-            $this->_dataPos->j = 0;
+        $this->_dataIter->next();
+        if (!$this->_dataIter->valid()) {
+            $this->_siteIter->next();
+            $this->_dataIter = $this->_siteIter->getChildren();
         }
         return;
     }
 
     public function valid()
     {
-        /* Return true if the end of the array hasn't been reached. */
-
-        return $this->_dataPos->i < count($this->data);
+        return $this->_siteIter->valid() and $this->_dataIter->valid();
     }
 
     public function rewind()
     {
-        /* Reset the array position to the first element. */
-
-        $this->_dataPos->i = $this->_dataPos->j = 0;
+        $this->_siteIter = new RecursiveArrayIterator($this->data);
+        $this->_dataIter = $this->_siteIter->getChildren();
         return;
     }
 
@@ -212,11 +188,7 @@ class ACIS_StnDataResult extends _ACIS_DataResult
 
     public function current()
     {
-        /* Return the current record as an associative array. */
-
-        if (!($record = parent::current())) {
-            return null;
-        }
+        $record = $this->_dataIter->current();
         array_unshift($record, $this->key());  // prepend uid
         return $record;
     }
@@ -245,15 +217,13 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
         }
         list($sdate, $edate, $interval) = ACIS_dateSpan($query['params']);
         $dates = ACIS_dateRange($sdate, $edate, $interval);
-        $this->_dateIter = new ArrayIterator($dates);
+        $this->_dateIter = new InfiniteIterator(new ArrayIterator($dates));
         return;
     }
 
     public function current()
     {
-        if (!($record = parent::current())) {
-            return null;
-        }
+        $record = $this->_dataIter->current();
         array_unshift($record, $this->_dateIter->current());
         array_unshift($record, $this->key());
         return $record;
@@ -261,18 +231,16 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 
     public function next()
     {
-        // Keep date iterator in sync with date.
-        $uid = $this->key();
         parent::next();
-        if (!$this->valid()) {
-            return;
-        }
-        if ($this->key() == $uid) {
-            $this->_dateIter->next();
-        }
-        else {  // next site
-            $this->_dateIter->rewind();
-        }
+        $this->_dateIter->next();
+        return;
+    }
+    
+    public function rewind()
+    {
+        parent::rewind();
+        $this->_dateIter->rewind();
         return;
     }
 }
+

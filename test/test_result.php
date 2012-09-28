@@ -106,6 +106,7 @@ abstract class _DataResultTest extends _MetaResultTest
             $this->assertEquals($this->_records[$i], $record);
             ++$i;
         }
+        $this->assertEquals(count($result), $i);
         return;
     }
 }
@@ -134,8 +135,8 @@ class StnDataResultTest extends _DataResultTest
 
     public function testNoUid()
     {
-    	$message = 'metadata does not contain uid';
-		$this->setExpectedException('ACIS_ResultException', $message);
+        $message = 'metadata does not contain uid';
+        $this->setExpectedException('ACIS_ResultException', $message);
         unset($this->_query['result']['meta']['uid']);
         new $this->_RESULT_CLASS($this->_query);
         return;

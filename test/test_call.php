@@ -12,7 +12,7 @@ class WebServicesCallTEstTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
-    	$test_data = json_decode(file_get_contents('data/StnData.json'), true);
+        $test_data = json_decode(file_get_contents('data/StnData.json'), true);
         $this->_params = $test_data['params'];
         $this->_result = $test_data['result'];
         $this->_call = new ACIS_WebServicesCall('StnData');
@@ -28,7 +28,7 @@ class WebServicesCallTEstTest extends PHPUnit_Framework_TestCase
 
     public function testCall()
     {
-    	$call = $this->_call;
+        $call = $this->_call;
         $result = $call($this->_params);
         $this->assertEquals($result, $this->_result);
         return;
@@ -36,8 +36,8 @@ class WebServicesCallTEstTest extends PHPUnit_Framework_TestCase
 
     public function testException()
     {
-    	$call = $this->_call;
-		$this->setExpectedException('ACIS_RequestException', 'Need sId');
+        $call = $this->_call;
+        $this->setExpectedException('ACIS_RequestException', 'Need sId');
         $call(array());
         return;
     }

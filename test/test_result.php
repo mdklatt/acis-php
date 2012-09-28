@@ -10,7 +10,7 @@ require_once 'acis.php';
 
 abstract class _ResultTest extends PHPUnit_Framework_TestCase
 {
-	protected $_JSON_FILE = null;
+    protected $_JSON_FILE = null;
     
     protected function _loadData()
     {
@@ -29,7 +29,7 @@ abstract class _MetaResultTest extends _ResultTest
     {
         $testData = $this->_loadData();
         $params = $testData['params'];
-    	$result = $testData['result'];
+        $result = $testData['result'];
         $this->_query = array('params' => $params, 'result' => $result);
         $this->_meta = $testData['meta'];
         return;
@@ -57,7 +57,7 @@ abstract class _DataResultTest extends _MetaResultTest
     {
         $testData = $this->_loadData();
         $params = $testData['params'];
-    	$result = $testData['result'];
+        $result = $testData['result'];
         $this->_query = array('params' => $params, 'result' => $result);
         $this->_meta = $testData['meta'];
         $this->_data = $testData['data'];
@@ -119,11 +119,11 @@ class StnMetaResultTest extends _MetaResultTest
 
     public function testNoUid()
     {
-    	$message = 'metadata does not contain uid';
-		$this->setExpectedException('ACIS_ResultException', $message);
+        $message = 'metadata does not contain uid';
+        $this->setExpectedException('ACIS_ResultException', $message);
         unset($this->_query['result']['meta'][0]['uid']);
         new $this->_RESULT_CLASS($this->_query);
-    	return;
+        return;
     }
 }
 
@@ -151,8 +151,8 @@ class MultiStnDataResultTest extends _DataResultTest
 
     public function testNoUid()
     {
-    	$message = 'metadata does not contain uid';
-		$this->setExpectedException('ACIS_ResultException', $message);
+        $message = 'metadata does not contain uid';
+        $this->setExpectedException('ACIS_ResultException', $message);
         unset ($this->_query['result']['data'][0]['meta']['uid']);
         new $this->_RESULT_CLASS($this->_query);
         return;

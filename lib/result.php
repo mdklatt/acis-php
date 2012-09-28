@@ -95,7 +95,7 @@ implements Countable, Iterator
     public $meta = array();
     public $data = array();
     public $smry = array();
-    public $fields = array();
+    public $elems = array();
 
     public function __construct($query)
     {
@@ -132,7 +132,7 @@ implements Countable, Iterator
     // results are not currently supported). Array traversal is column-first.
     // Derived classes must implement the current() method.
 
-    protected $_siteIter;
+    protected $_siteIter; 
     protected $_dataIter;
 
     public function key() 
@@ -145,6 +145,7 @@ implements Countable, Iterator
     {
         $this->_dataIter->next();
         if (!$this->_dataIter->valid()) {
+            // No more records for this site so advance to the next one.
             $this->_siteIter->next();
             $this->_dataIter = $this->_siteIter->getChildren();
         }
@@ -231,6 +232,9 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
 
     public function next()
     {
+        // The number of records for every site is equal to the number of 
+        // dates, so _dateIter will automatically rewind when advancing to the
+        // next site because it's an InfiniteIterator.
         parent::next();
         $this->_dateIter->next();
         return;

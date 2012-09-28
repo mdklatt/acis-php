@@ -166,15 +166,6 @@ implements Iterator
     }
 
     /**
-     * Convert the current line of text to a record.
-     *
-     * Each derived class must implement this to return a record of the form
-     * (sid, date, elem1, ...).
-     *
-     */
-    abstract public function current();
-
-    /**
      * Return the key for the current element.
      *
      * This is a required part of the Iterator interface, but keys have no

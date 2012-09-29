@@ -16,25 +16,32 @@
  *
  * This implementation is based on ACIS Web Services Version 2:
  *     <http://data.rcc-acis.org/doc/>.
- *
  */
 require_once 'date.php';
 require_once 'exception.php';
 
+
 /**
  * Abstract base class for all result object.
- *
  */
 abstract class _ACIS_JsonResult
 {
     private $_elems = array();
     
+    /**
+     * Return the requested element names.
+     *
+     * Duplicate names will be indexed, e.g. maxt0, maxt1.
+     */
     public function elems()
     {
-        // For compatibility this is a function instead of an attribute.
+        // For compatibility this is a function instead of a simple attribute.
         return $this->_elems;
     }
     
+    /**
+     * Initialize an _ACIS_JsonResult object.
+     */
     protected function __construct($query)
     {
         if (!array_key_exists('params', $query)) {
@@ -67,11 +74,19 @@ abstract class _ACIS_JsonResult
     }
 }
 
-
+/**
+ * A result from a StnMeta call.
+ *
+ * The meta attribute is an associative aray keyed to the ACIS site UID, so
+ * this field must be included in the result metadata.
+ */
 class ACIS_StnMetaResult extends _ACIS_JsonResult
 {
     public $meta = array();
 
+    /**
+     * Initialize an ACIS_StnMetaResult object.
+     */
     public function __construct($query)
     {
         parent::__construct($query);
@@ -89,14 +104,23 @@ class ACIS_StnMetaResult extends _ACIS_JsonResult
 }
 
 
-abstract class _ACIS_DataResult extends _ACIS_JsonResult
-implements Countable, Iterator
+/**
+ * Abstract base class for station data results.
+ *
+ * The data, meta, and smry attributes are associative arrays that are keyed to
+ * the ACIS site UID, so this field must be included in the result metadata.
+ */
+abstract class _ACIS_DataResult extends _ACIS_JsonResult 
+    implements Countable, Iterator
 {
     public $meta = array();
     public $data = array();
     public $smry = array();
     public $elems = array();
 
+    /**
+     * Initialize an _ACIS_DataResult object.
+     */
     public function __construct($query)
     {
         parent::__construct($query);
@@ -114,10 +138,11 @@ implements Countable, Iterator
 
     // This is the implementation of the Countable interface.
 
+    /**
+     * Return the number of records in this result.
+     */
     public function count()
     {
-        /* Return the total number of records in the $data attribute. */
-
         $count = 0;
         foreach ($this->data as $arr) {
             $count += count($arr);
@@ -127,20 +152,28 @@ implements Countable, Iterator
 
 
     // This is the implementation of the Iterator interface, which operates on
-    // the $data attribute. This is a 2D array where the row index is the site
-    // (keyed by the ACIS site UID) and the column index is time ('groupby'
-    // results are not currently supported). Array traversal is column-first.
-    // Derived classes must implement the current() method.
+    // the data attribute. This allows a result object to be used in a foreach
+    // statement, for example. This is a 2D array where the row index is the
+    // site (keyed by the ACIS site UID), and each column is a data record 
+    // ("groupby" results are not currently supported). Array traversal is
+    // column-first. Derived classes must implement the current() method.
 
     protected $_siteIter; 
     protected $_dataIter;
 
+    /**
+     * Return the current array key.
+     *
+     * This is the current site UID and thus is not unique.
+     */
     public function key() 
     {
-        // The current site UID. 
         return $this->_siteIter->key();
     }
 
+    /**
+     * Advance to the next record.
+     */
     public function next()
     {
         $this->_dataIter->next();
@@ -152,11 +185,17 @@ implements Countable, Iterator
         return;
     }
 
+    /**
+     * Return true if the iterator points to a valid array index.
+     */
     public function valid()
     {
         return $this->_siteIter->valid() and $this->_dataIter->valid();
     }
 
+    /**
+     * Reset the iterator to the first record.
+     */
     public function rewind()
     {
         $this->_siteIter = new RecursiveArrayIterator($this->data);
@@ -167,8 +206,14 @@ implements Countable, Iterator
 }
 
 
+/**
+ * A result from a StnData call.
+ */
 class ACIS_StnDataResult extends _ACIS_DataResult
 {
+    /**
+     * Initialize an ACIS_StnDataResult object.
+     */
     public function __construct($query)
     {
         parent::__construct($query);
@@ -187,6 +232,11 @@ class ACIS_StnDataResult extends _ACIS_DataResult
         return;
     }
 
+    /**
+     * Return the current record.
+     *
+     * The returned value is an array of the form (uid, date, elem1, ...)
+     */
     public function current()
     {
         $record = $this->_dataIter->current();
@@ -196,10 +246,16 @@ class ACIS_StnDataResult extends _ACIS_DataResult
 }
 
 
+/**
+ * A result from a MultiStnData call.
+ */
 class ACIS_MultiStnDataResult extends _ACIS_DataResult
 {
     private $_dateIter;
 
+    /**
+     * Initialize an ACIS_MultiStnDataResult object.
+     */
     public function __construct($query)
     {
         parent::__construct($query);
@@ -222,6 +278,11 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
         return;
     }
 
+    /**
+     * Return the current record.
+     *
+     * The returned value is an array of the form (uid, date, elem1, ...)
+     */
     public function current()
     {
         $record = $this->_dataIter->current();
@@ -230,6 +291,9 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
         return $record;
     }
 
+    /**
+     * Advance to the next record.
+     */
     public function next()
     {
         // The number of records for every site is equal to the number of 
@@ -240,6 +304,9 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
         return;
     }
     
+    /**
+     * Reset the iterator to the first record.
+     */
     public function rewind()
     {
         parent::rewind();

@@ -9,9 +9,11 @@
  *
  * This implementation is based on ACIS Web Services Version 2:
  *     <http://data.rcc-acis.org/doc/>.
- *
  */
 require_once 'exception.php';
+
+define('ACIS_HTTP_OK', 200);
+define('ACIS_HTTP_BAD', 400);
 
 
 /**
@@ -19,7 +21,6 @@ require_once 'exception.php';
  *
  * This class handles the encoding of the params object, the HTTP request and
  * error handling, and decoding of the returned result.
- *
  */
 class ACIS_WebServicesCall
 {
@@ -27,6 +28,11 @@ class ACIS_WebServicesCall
     
     public $url;
     
+    /**
+     * Initialize an ACIS_WebServicesCall object.
+     *
+     * The call_type parameter is the type of ACIS call, e.g. "StnData".
+     */
     public function __construct($call_type)
     {
         $this->url = implode('/', array(ACIS_WebServicesCall::_SERVER, 
@@ -52,7 +58,6 @@ class ACIS_WebServicesCall
      * parameters. The result depends on the output type specified in params. 
      * JSON output (the default) gets decoded and returned as an associative
      * array, and for all other output types a stream resource gets returned.
-     *
      */
     public function execute($params)
     {
@@ -65,22 +70,22 @@ class ACIS_WebServicesCall
                 strtolower($params['output']) != 'json') {
             return $stream;
         }
-        $result = json_decode(stream_get_contents($stream), true);
-        if (!$result) {
+        if (!($result = json_decode(stream_get_contents($stream), true))) {
+            @fclose($stream);
             throw new ACIS_ResultException('server returned invalid JSON');
         }
+        @fclose($stream);
         return $result;
     }
     
     /**
      * Execute a POST request.
      *
-     * The data parameter must be a properly encoded and escaped string.
+     * The data parameter must be a properly encoded and escaped string. The
+     * return value is a stream resource.
      */
     private function _post($data)
     {
-        $HTTP_OK = 200;
-        $HTTP_BAD = 400;
         $options = array('method' => 'POST', 'content' => $data, 
                          'ignore_errors'=>true);
         $context = stream_context_create(array('http' => $options));
@@ -88,16 +93,18 @@ class ACIS_WebServicesCall
             throw new Exception("could not open connection to {$this->url}");
         }
         list(, $code, $message) = explode(' ', $http_response_header[0], 3);
-        if ($code != $HTTP_OK) {
+        if ($code != ACIS_HTTP_OK) {
             // This doesn't do the right thing for a "soft 404", e.g. an ISP
             // redirects to a custom error or search page for a DNS lookup
             // failure and returns a 200 (OK) code.
-            if ($code == $HTTP_BAD) {
+            if ($code == ACIS_HTTP_BAD) {
                 // If the ACIS server returns this code it also provides a
                 // helpful plain text error message.
                 $message = stream_get_contents($stream);
+                @fclose($stream);
                 throw new ACIS_RequestException($message);
             }
+            @fclose($stream); 
             throw new Exception("HTTP error: {$code} {$message}");
         }
         return $stream;

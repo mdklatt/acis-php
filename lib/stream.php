@@ -24,7 +24,6 @@ require_once 'exception.php';
  * CSV records can be streamed one at a time, which might be useful for large 
  * requests. Streaming is implemented using the Iterator interface, e.g. as 
  * part of a foreach loop.
- *
  */
 abstract class _ACIS_CsvStream
 implements Iterator
@@ -40,7 +39,6 @@ implements Iterator
 
     /**
      * Initialize an _ACIS_CsvStream object.
-     *
      */
     public function __construct($call_type)
     {       
@@ -50,11 +48,9 @@ implements Iterator
     
     /**
      * Clean up an _ACIS_CsvStream object.
-     *
      */
     public function __destruct()
     {
-        // Close the connection to the server.
         @fclose($this->_stream);
         return;
     }
@@ -63,7 +59,6 @@ implements Iterator
      * Set the interval for this request.
      *
      * The default interval is daily ('dly')
-     *
      */ 
     public function interval($value)
     {
@@ -72,8 +67,9 @@ implements Iterator
     }
 
     /**
-     * Return an array of the requested element names.
+     * Return the requested element names.
      *
+     * Duplicate names will be indexed, e.g. maxt0, maxt1.
      */
     public function elems()
     {
@@ -86,9 +82,6 @@ implements Iterator
     
     /**
      * Add an element to this request.
-     *
-     * Adding an element that already exists will overwrite the existing
-     * element.
      */
     public function addElement($name, $options=array())
     {
@@ -98,8 +91,7 @@ implements Iterator
     }
     
     /**
-     * Delete all or just "name" from the request elements.
-     *
+     * Clear all elements from this request.
      */
     public function clearElements()
     {
@@ -109,12 +101,11 @@ implements Iterator
     
     /**
      * Reset the stream.
-     *
      */
     public function rewind()
     {
         // This is called to initialize the iterator, e.g. at the start of a
-        // foreach loop, so use it to make the ACIS, check for errors, and
+        // foreach loop, so use it to make the ACIS call, check for errors, and
         // advance to the first line of data.
         foreach ($this->_params['elems'] as &$elem) {
             $elem['interval'] = $this->_interval;
@@ -122,6 +113,7 @@ implements Iterator
         $this->_stream = $this->_call->execute($this->_params);
         $this->next();
         if (!$this->_stream) {
+            @fclose($stream);
             throw new Exception("error reading from stream");
         }
         if (substr($this->_current, 0, strlen("error")) === "error") {
@@ -137,13 +129,11 @@ implements Iterator
      *
      * Derived classes should override this if the stream contains any header
      * information. The stream must be advanced to the first line of data. 
-     *
      */
     protected function _header() { return; }
     
     /**
      * Retrieve the next line of text from the server.
-     *
      */ 
     public function next()
     {
@@ -157,8 +147,7 @@ implements Iterator
     }
     
     /**
-     * Return whether or not the stream is in a valid state.
-     *
+     * Return true or not the stream is in a valid state.
      */
     public function valid()
     {
@@ -170,19 +159,19 @@ implements Iterator
      *
      * This is a required part of the Iterator interface, but keys have no
      * meaning in this context so null is returned.
-     *
      */
     public function key() { return null; }
 }
 
-
+/** 
+ * A StnData stream.
+ */
 class ACIS_StnDataStream extends _ACIS_CsvStream
 {
     private $_sid;
     
     /**
      * Construct an ACIS_StnDataStream object.
-     *
      */
     public function __construct()
     {
@@ -191,10 +180,9 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
     }
     
     /**
-     * Set the location for this request.
+     * Set the location options for this request.
      *
-     * StnData only accepts a single "sid" or "uid" parameter.
-     *
+     * StnData only accepts a single "sid" or "uid" parameter.x
      */
      public function location($options) 
      {
@@ -208,7 +196,7 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
      }
     
     /**      
-     * Specify the date range (inclusive) for this request.
+     * Set the date range (inclusive) for this request.
      *
      * If no edate is specified sdate is treated as a single date. The
      * parameters must be a date string or the value "por" which means to
@@ -226,8 +214,7 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
     }
     
     /**
-     * Read the stream header.
-     *
+     * Get header information from the stream.
      */
     protected function _header()
     {
@@ -240,9 +227,7 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
     /**
      * Process the current line of text.
      *
-     * Return a record of the form (sid, date, elem1, ...). Not all metadata 
-     * fields are present for all sites.
-     *
+     * Return a record of the form (sid, date, elem1, ...). 
      */
     public function current()
     {
@@ -277,12 +262,11 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
     } 
     
     /**
-     * Specify the date for this request.
+     * Set the date for this request.
      *
      * MultStnData only accepts a single date for CSV output. Acceptable date
      * formats are YYYY-[MM-[DD]] (hyphens are optional but leading zeroes
      * are not; no two-digit years).
-     *
      */
     public function date($date)
     {
@@ -300,7 +284,6 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
      *
      * Read the metadata for this site and return a record of the form (sid,
      * date, elem1, ...). Not all metadata fields are present for all sites.
-     *
      */
     public function current()
     {
@@ -313,8 +296,8 @@ class ACIS_MultiStnDataStream extends _ACIS_CsvStream
         if ($lon != null and $lat != null) {
             $this->meta[$sid]['ll'] = array((float)$lon, (float)$lat);
         }
-        $record = array_merge(array($sid, $this->_params['date']),
-                array_slice($record, 6));
+        $elements = array_slice($record, 6);
+        $record = array_merge(array($sid, $this->_params['date']), $elements);
         return $record;
     }
 }

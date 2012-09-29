@@ -9,20 +9,21 @@
  * The client needs to define a default time zone or the DateTime functions
  * will throw an exeption:
  *     date_default_timezone_set('UTC'); 
- *
  */
  
+ /**
+  * A valid ACIS date string, although it accepts mixed hyphenation, i.e.
+  * YYYYMM-DD and YYYY-MMDD are ok
+  */
+ define('ACIS_DATE_REGEX', '/^(\d{4})(?:-?(\d{2}))?(?:-?(\d{2}))?$/');
+
  /**
  * Convert an ACIS date string to a DateTime object.
  *
  * Valid date formats are YYYY[-MM[-DD]] (hyphens are optional but leading
  * zeroes are not; no two-digit years).
- *
  */
- define('ACIS_DATE_REGEX', '/^(\d{4})(?:-?(\d{2}))?(?:-?(\d{2}))?$/');
-
-
-function ACIS_dateObject($date)
+ function ACIS_dateObject($date)
 {
     if (!preg_match(ACIS_DATE_REGEX, $date, $matches)) {
         throw new Exception("invalid date: {$date}");
@@ -38,7 +39,6 @@ function ACIS_dateObject($date)
 
 /**
  * Return an ACIS-format date string from a DateTime object.
- *
  */
 function ACIS_dateString($date)
 {
@@ -49,7 +49,6 @@ function ACIS_dateString($date)
  * Determine the date delta for an interval.
  *
  * An interval can be a name ("dly", "mly", "yly") or a (yr, mo, da) array.
- * 
  */
  function ACIS_dateDelta($interval)
 {
@@ -73,7 +72,6 @@ function ACIS_dateString($date)
  *
  * The only interval that have an effect are "yly" and "mly". For all other
  * intervals, include (y, m d) arrays, the precision daily.
- *
  */
 function ACIS_dateTrunc($date, $interval)
 {
@@ -96,15 +94,12 @@ function ACIS_dateTrunc($date, $interval)
 
 
 /**
- * Return an array of dates.
+ * Return a date range.
  *
- * The params parameter is an array of options defining an ACIS call. The
- * returned date range will be the dates for a result returned by that
- * call. This cannot be used for period-of-record ("por") date ranges.
- *
- * IN THE CURRENT IMPLEMENTATION THE RESULTS FOR A "GROUPBY" RESULT WILL NOT
- * BE CORRECT.
- *
+ * An array of dates is returned based on the start date, ened date (inclusive) 
+ * and interval. A single date is returned if edate is null. The interval can
+ * be "yly", "mly", "dly" or a year, month, day array. The returned dates will
+ * have a precision defined by the interval (see ACIS_dateTrunc).
  */
  function ACIS_dateRange($sdate, $edate=null, $interval="dly")
  {

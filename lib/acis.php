@@ -1,7 +1,19 @@
 <?php
-require_once 'date.php';
-require_once 'exception.php';
-require_once 'request.php';
-require_once 'result.php';
-require_once 'stream.php';
-require_once 'util.php';
+/**
+ * The acis library.
+ *
+ * This library provides tools for ACIS Web Services clients.
+ */
+
+/**
+ * This library uses the Semantic Versioning scheme:
+ *     <http://semver.org>
+ */
+define('ACIS_VERSION', '0.1.0x');
+
+require 'date.php';
+require 'exception.php';
+require 'request.php';
+require 'result.php';
+require 'stream.php';
+require 'util.php';

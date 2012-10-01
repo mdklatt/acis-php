@@ -62,7 +62,7 @@ $params = array('sid'   => 'OKC',
                 'date'  => '2012-08-03', 
                 'elems' => 'maxt',
                 'meta'  => 'name');
-$result = $acis_call($params);
+$result = $acis_call->execute($params);
 $name = $result['meta']['name'];
 list($date, $maxt) = $result['data'][0];  // first and only record
 print "The high temperature for {$name} on {$date} was {$maxt}F.".PHP_EOL;
@@ -78,7 +78,7 @@ print 'EXAMPLE 2'.PHP_EOL;
 $acis_call = new ACIS_WebServicesCall('StnData');
 $params = array('date' => '2012-08-03', 'elems' => 'maxt');  // oops, no site
 try {
-    $result = $acis_call($params);
+    $result = $acis_call->execute($params);
 }
 catch (ACIS_RequestException $ex) {
     print "Oops: {$ex->getMessage()}".PHP_EOL;

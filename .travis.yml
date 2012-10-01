@@ -8,8 +8,8 @@
 
 language: php
 php:
+    - 5.2
     - 5.3
-
 
 # Test script
 
@@ -21,3 +21,4 @@ script: php -f test/test_acis.php
 branches:
     only:
         - master
+        - dev-0.1

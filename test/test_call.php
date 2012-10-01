@@ -28,17 +28,15 @@ class WebServicesCallTest extends PHPUnit_Framework_TestCase
 
     public function testCall()
     {
-        $call = $this->_call;
-        $result = $call($this->_params);
+        $result = $this->_call->execute($this->_params);
         $this->assertEquals($result, $this->_result);
         return;
     }
 
     public function testException()
     {
-        $call = $this->_call;
         $this->setExpectedException('ACIS_RequestException', 'Need sId');
-        $call(array());
+        $this->_call->execute(array('elems' => 'mint'));
         return;
     }
 }

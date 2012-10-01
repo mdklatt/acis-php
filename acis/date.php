@@ -59,7 +59,7 @@ function ACIS_dateString($date)
     );
     if (is_string($interval)) {
         if (($interval = @$named_deltas[$interval]) === null) {
-            throw Exception("unknown interval: {$interval}");            
+            throw new Exception("unknown interval: {$interval}");            
         }
     }
     list($yr, $mo, $da) = $interval;

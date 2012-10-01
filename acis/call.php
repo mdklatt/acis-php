@@ -63,7 +63,7 @@ class ACIS_WebServicesCall
     {
         $json_flag = !empty($params) ? 0 : JSON_FORCE_OBJECT;
         if (!($json = json_encode($params, $json_flag))) {
-            throw Exception('JSON encoding for params failed');
+            throw new Exception('JSON encoding for params failed');
         } 
         $stream = $this->_post(http_build_query(array('params' => $json)));
         if (array_key_exists('output', $params) && 

@@ -8,7 +8,7 @@
 require_once 'acis.php';
 
 
-class WebServicesCallTEstTest extends PHPUnit_Framework_TestCase
+class WebServicesCallTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {

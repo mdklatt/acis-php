@@ -32,6 +32,32 @@ function ACIS_annotate($arr)
     return array_reverse($annotated);
 }
 
+
+/**
+ * Construct an element array.
+ *
+ * The elem parameter can be an element name, a var major (vX) code, or an
+ * associative array. An element can have a user-specified alias assigned to
+ * the "alias" key if elem is an array. Otherwise, the alias will be the
+ * element name or "vxN" for var major code N. 
+ */
+function ACIS_makeElement($elem)
+{
+    if (!is_array($elem)) {
+        if (is_numeric($elem)) {
+            $elem = array('vX' => (int)$elem);
+        }
+        else {
+            $elem = array('name' => strtolower($elem));
+        }
+    }
+    if (!array_key_exists('alias', $elem)) {
+        $elem['alias'] = ($vx = @$elem['vX']) ? "vx{$vx}" : $elem['name'];
+    }
+    return $elem;
+}
+    
+
 /**
  * Define the date parameters for a call.
  *

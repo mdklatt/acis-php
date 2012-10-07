@@ -147,12 +147,12 @@ abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
     /**
      * Add an element to this request.
      *
-     * The options parameter is an associative array.
+     * If ident is an integer literal or string it will be treated as a var
+     * major (vX) specifer. The options parameter is an associative array.
      */
-    public function addElement($name, $options=array())
+    public function addElement($ident, $options=array())
     {
-        // TODO: Need to validate $options.
-        $elem = array_merge(array('name' => $name), $options);
+        $elem = array_merge(ACIS_makeElement($ident), $options);
         $this->_params['elems'][] = $elem;
         return;
     }
@@ -206,12 +206,12 @@ class ACIS_StnMetaRequest extends _ACIS_PlaceTimeRequest
      *
      * The elements parameter is a single string or an array of element names.
      */
-    public function elements($names)
+    public function elements($idents)
     {
-        if (is_string($names)) {
-            $names = array($names);
+        if (!is_array($idents)) {
+            $idents = array($idents);
         }
-        $this->_params['elems'] = $names;
+        $this->_params['elems'] = array_map('ACIS_makeElement', $idents);
         return;
     }
 }

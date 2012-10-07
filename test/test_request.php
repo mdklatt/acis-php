@@ -61,7 +61,7 @@ class StnDataRequestTest extends _RequestTest
         $this->_request->metadata(array('county', 'name'));
         $this->_request->dates('2011-12-31', '2012-01-01');
         $this->_request->addElement('mint', array('smry' => 'min'));
-        $this->_request->addElement('maxt', array('smry' => 'max'));        
+        $this->_request->addElement(1, array('smry' => 'max'));        
         $query = $this->_request->submit();
         $this->assertEquals($query['result'], $this->_query['result']);
         return;
@@ -80,7 +80,7 @@ class MultiStnDataRequestTest extends _RequestTest
         $this->_request->metadata(array('county', 'name'));
         $this->_request->dates('2011-12-31', '2012-01-01');
         $this->_request->addElement('mint', array('smry' => 'min'));
-        $this->_request->addElement('maxt', array('smry' => 'max'));        
+        $this->_request->addElement(1, array('smry' => 'max'));        
         $query = $this->_request->submit();
         $this->assertEquals($query['result'], $this->_query['result']);
         return;

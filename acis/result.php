@@ -55,21 +55,16 @@ abstract class _ACIS_JsonResult
         }
         
         // Define elements.
-        if (($elements = @$query['params']['elems']) === null) {
-            return;
-        }
-        if (is_string($elements)) {  // comma-delimited string
-            $elements = explode(',', $elements);
-        }
-        elseif (is_array($elements[0])) {  // element objects
-            foreach ($elements as &$elem) {
-                $elem = $elem['name'];
+        if (($elems = @$query['params']['elems'])) {
+            $aliases = array();
+            foreach (array_map('ACIS_makeElement', $elems) as $elem) {
+                $aliases[] = $elem['alias'];
             }
+            $this->_elems = ACIS_annotate($aliases);
         }
-        foreach ($elements as &$elem) {
-            $elem = trim($elem);
-        }    
-        $this->_elems = ACIS_annotate($elements);
+        else {
+            $this->_elems = array();
+        }
         return;
     }
 }
@@ -124,15 +119,6 @@ abstract class _ACIS_DataResult extends _ACIS_JsonResult
     public function __construct($query)
     {
         parent::__construct($query);
-        $elems = $query['params']['elems'];
-        if (is_array($elems)) {
-            foreach ($elems as $elem) {
-                $this->elems[] = is_array($elem) ? $elem['name'] : $elem;
-            }
-        }
-        else {  // comma-delimited string of element names
-            $this->elems = explode(',', $elems);
-        }
         return;
     }
 

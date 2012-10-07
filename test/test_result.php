@@ -63,10 +63,7 @@ abstract class _DataResultTest extends _MetaResultTest
         $this->_data = $testData['data'];
         $this->_smry = $testData['smry'];
         $this->_records = $testData['records'];
-        $this->_elems = array();
-        foreach ($this->_query['params']['elems'] as $elem) {
-            $this->_elems[] = $elem['name'];
-        }
+        $this->_elems = array('mint', 'vx1');
         return;
     }
 
@@ -89,7 +86,7 @@ abstract class _DataResultTest extends _MetaResultTest
     public function testElems()
     {
         $result = new $this->_RESULT_CLASS($this->_query);
-        $this->assertEquals($this->_elems, $result->elems);
+        $this->assertEquals($this->_elems, $result->elems());
     }
 
     public function testCount()

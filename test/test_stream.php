@@ -27,7 +27,7 @@ abstract class _StreamTest extends PHPUnit_Framework_TestCase
     
     public function testInit()
     {
-        $this->assertEquals($this->_stream->elems(), array());
+        $this->assertEquals(array(), $this->_stream->elems());
         return;
     }    
     
@@ -35,11 +35,11 @@ abstract class _StreamTest extends PHPUnit_Framework_TestCase
     {
         $this->assertEquals(array(), $this->_stream->elems());        
         $this->_stream->addElement('mint');
-        $this->_stream->addElement('maxt');
-        $this->assertEquals(array('mint', 'maxt'), $this->_stream->elems());
+        $this->_stream->addElement(1);  // maxt
+        $this->assertEquals(array('mint', 'vx1'), $this->_stream->elems());
         $this->_stream->addElement('mint');  // duplicates ok
-        $this->assertEquals(array('mint0', 'maxt', 'mint1'), 
-                $this->_stream->elems());
+        $this->assertEquals(array('mint0', 'vx1', 'mint1'), 
+                                                      $this->_stream->elems());
         $this->_stream->clearElements();
         $this->assertEquals(array(), $this->_stream->elems());        
         return;
@@ -57,7 +57,7 @@ class StnDataStreamTest extends _StreamTest
         $this->_stream->dates("2011-12-31", "2012-01-01");
         $this->_stream->location(array("sid" => "okc"));
         $this->_stream->addElement("mint");
-        $this->_stream->addElement("maxt");
+        $this->_stream->addElement(1);  // maxt
         $i = 0;
         foreach ($this->_stream as $record) {
             $this->assertEquals($this->_records[$i], $record); 
@@ -78,7 +78,7 @@ class MultiStnDataStreamTest extends _StreamTest
         $this->_stream->date("2011-12-31");
         $this->_stream->location(array("sids" => "okc,okcthr"));
         $this->_stream->addElement("mint");
-        $this->_stream->addElement("maxt");
+        $this->_stream->addElement(1);  // maxt
         $i = 0;
         foreach ($this->_stream as $record) {
             $this->assertEquals($this->_records[$i], $record); 

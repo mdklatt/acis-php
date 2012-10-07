@@ -73,19 +73,19 @@ implements Iterator
      */
     public function elems()
     {
-        $elem_names = array();
+        $aliases = array();
         foreach ($this->_params['elems'] as $elem) {
-            $elem_names[] = $elem['name'];
+            $aliases[] = $elem['alias'];
         }
-        return ACIS_annotate($elem_names);
+        return ACIS_annotate($aliases);
     }
     
     /**
      * Add an element to this request.
      */
-    public function addElement($name, $options=array())
+    public function addElement($ident, $options=array())
     {
-        $elem = array_merge(array('name' => $name), $options);
+        $elem = array_merge(ACIS_makeElement($ident), $options);
         $this->_params['elems'][] = $elem;
         return;
     }
@@ -116,7 +116,7 @@ implements Iterator
             @fclose($stream);
             throw new Exception("error reading from stream");
         }
-        if (substr($this->_current, 0, strlen("error")) === "error") {
+        if (substr($this->_current, 0, strlen('error')) === 'error') {
             list(, $message) = explode(':', $this->_current, 2);
             throw new ACIS_RequestError(trim($message));
         }
@@ -219,7 +219,7 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
     protected function _header()
     {
         // First line is the site name.
-        $this->meta[$this->_sid] = array("name" => $this->_current);
+        $this->meta[$this->_sid] = array('name' => $this->_current);
         $this->next();
         return;
     }

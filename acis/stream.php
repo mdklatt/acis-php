@@ -114,7 +114,8 @@ implements Iterator
         $this->next();
         if (!$this->_stream) {
             @fclose($stream);
-            throw new Exception("error reading from stream");
+            list(, $message) = error_get_last();
+            throw new RuntimeException($message);
         }
         if (substr($this->_current, 0, strlen('error')) === 'error') {
             list(, $message) = explode(':', $this->_current, 2);

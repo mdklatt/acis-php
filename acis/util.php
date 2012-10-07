@@ -14,11 +14,11 @@ function ACIS_sidsTable($sids)
     $table = array();
     foreach ($sids as $sid) {
         if (!preg_match($SID_REGEX, $sid, $matches)) {
-            throw new Exception("invalid sid: {$sid}");
+            throw new InvalidArgumentException("invalid sid: {$sid}");
         }
         list(, $ident, $code) = $matches;
         if (($sid_type = @$SID_TYPES[$code]) === null) {
-            throw new Exception("uknknown sid type: {$code}");
+            throw new InvalidArgumentException("invalid sid type: {$code}");
         }
         $table[$sid_type] = $ident;
     }

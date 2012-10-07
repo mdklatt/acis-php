@@ -65,7 +65,7 @@ class ACIS_WebServicesCall
             throw new ACIS_RequestException("empty params");
         }
         if (!($json = json_encode($params))) {
-            throw new Exception('JSON encoding for params failed');
+            throw new RuntimeException('JSON encoding of params failed');
         } 
         $stream = $this->_post(http_build_query(array('params' => $json)));
         if (array_key_exists('output', $params) && 
@@ -92,7 +92,8 @@ class ACIS_WebServicesCall
                          'ignore_errors'=>true);
         $context = stream_context_create(array('http' => $options));
         if (!($stream = @fopen($this->url, 'rb', false, $context))) {
-            throw new Exception("could not open connection to {$this->url}");
+            list(, $message) = error_get_last();
+            throw new RuntimeException($message);
         }
         list(, $code, $message) = explode(' ', $http_response_header[0], 3);
         if ($code != ACIS_HTTP_OK) {
@@ -107,7 +108,7 @@ class ACIS_WebServicesCall
                 throw new ACIS_RequestException($message);
             }
             @fclose($stream); 
-            throw new Exception("HTTP error: {$code} {$message}");
+            throw new RuntimeException("HTTP error: {$code} {$message}");
         }
         return $stream;
     }

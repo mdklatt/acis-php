@@ -45,10 +45,10 @@ abstract class _ACIS_JsonResult
     protected function __construct($query)
     {
         if (!array_key_exists('params', $query)) {
-            throw new Exception("missing required params value");
+            throw new InvalidArgumentException("missing params value");
         }
         if (!array_key_exists('result', $query)) {
-            throw new Exception("missing required result value");
+            throw new InvalidArgumentException("missing result value");
         }
         if (array_key_exists('error', $query['result'])) {
             throw new ACIS_ResultException($query['result']['error']);

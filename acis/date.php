@@ -26,7 +26,7 @@
  function ACIS_dateObject($date)
 {
     if (!preg_match(ACIS_DATE_REGEX, $date, $matches)) {
-        throw new Exception("invalid date: {$date}");
+        throw new InvalidArgumentException("invalid date: {$date}");
     }
     $yr = (int)$matches[1];
     $mo = count($matches) >= 3 ? $matches[2] : 1;
@@ -59,7 +59,7 @@ function ACIS_dateString($date)
     );
     if (is_string($interval)) {
         if (($interval = @$named_deltas[$interval]) === null) {
-            throw new Exception("unknown interval: {$interval}");            
+            throw new InvalidArgumentException("invalid interval: {$interval}");            
         }
     }
     list($yr, $mo, $da) = $interval;
@@ -76,7 +76,7 @@ function ACIS_dateString($date)
 function ACIS_dateTrunc($date, $interval)
 {
     if (!preg_match(ACIS_DATE_REGEX, $date, $matches)) {
-        throw new Exception("invalid date: {$date}");
+        throw new InvalidArgumentException("invalid date: {$date}");
     }
     $precision = array('yly' => 1, 'mly' => 2);    
     if (($prec = @$precision[$interval]) === null) {

@@ -26,7 +26,7 @@ function ACIS_annotate($arr)
             if ($item != $key) {
                 continue;
             }
-            $item .= --$count;
+            $item .= "_" . --$count;
         }
     }
     return array_reverse($annotated);

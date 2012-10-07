@@ -38,7 +38,7 @@ abstract class _StreamTest extends PHPUnit_Framework_TestCase
         $this->_stream->addElement(1);  // maxt
         $this->assertEquals(array('mint', 'vx1'), $this->_stream->elems());
         $this->_stream->addElement('mint');  // duplicates ok
-        $this->assertEquals(array('mint0', 'vx1', 'mint1'), 
+        $this->assertEquals(array('mint_0', 'vx1', 'mint_1'), 
                                                       $this->_stream->elems());
         $this->_stream->clearElements();
         $this->assertEquals(array(), $this->_stream->elems());        

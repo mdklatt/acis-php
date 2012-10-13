@@ -6,9 +6,10 @@ Overview
 The [acis-php][1] library provides tools for [ACIS Web Services][5] client 
 applications. There is also a [Python version][7].
 
+
 Requirements
 ------------
-PHP >= 5.2
+PHP 5.2 - 5.4
 
 
 Installation

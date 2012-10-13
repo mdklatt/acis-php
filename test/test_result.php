@@ -138,6 +138,21 @@ class StnDataResultTest extends _DataResultTest
         new $this->_RESULT_CLASS($this->_query);
         return;
     }
+
+    /**
+     * Test a smry_only result.
+     */
+    public function testSmryOnly()
+    {
+        unset($this->_query['result']['data']);
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals($this->_smry, $result->smry);
+        foreach ($result as $record) {
+            $this->assertTrue(false);  // data should be empty
+        }
+        return;
+        
+    }
 }
 
 
@@ -153,5 +168,22 @@ class MultiStnDataResultTest extends _DataResultTest
         unset ($this->_query['result']['data'][0]['meta']['uid']);
         new $this->_RESULT_CLASS($this->_query);
         return;
+    }
+
+    /**
+     * Test a smry_only result.
+     */
+    public function testSmryOnly()
+    {
+        foreach ($this->_query['result']['data'] as &$site) {
+            unset($site['data']);            
+        }
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals($this->_smry, $result->smry);
+        foreach ($result as $record) {
+            $this->assertTrue(false);  // data should be empty
+        }
+        return;
+        
     }
 }

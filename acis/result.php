@@ -211,10 +211,8 @@ class ACIS_StnDataResult extends _ACIS_DataResult
         $uid = $result['meta']['uid'];
         unset($result['meta']['uid']);
         $this->meta[$uid] = $result['meta'];
-        $this->data[$uid] = $result['data'];
-        if (array_key_exists('smry', $result)) {
-            $this->smry[$uid] = $result['smry'];
-        }
+        $this->data[$uid] = ($data = @$result['data']) ? $data : array();
+        $this->smry[$uid] = ($smry = @$result['smry']) ? $smry : array();
         return;
     }
 
@@ -259,13 +257,11 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
             // For single-date requests MultiStnData returns the one record for
             // each site as a 1D array instead of a 2D array. (StnData returns
             // a 2D array no matter what.)
-            if (count($dates) == 1) {
+            if (count($dates) == 1 and array_key_exists($site, 'data')) {
                 $site['data'] = array($site['data']);
             }
-            $this->data[$uid] = $site['data'];
-            if (array_key_exists('smry', $site)) {
-                $this->smry[$uid] = $site['smry'];
-            }
+            $this->data[$uid] = ($data = @$site['data']) ? $data : array();
+            $this->smry[$uid] = ($smry = @$site['smry']) ? $smry : array();
         }
         return;
     }

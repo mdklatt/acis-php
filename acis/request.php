@@ -301,8 +301,6 @@ class ACIS_MultiStnDataRequest extends _ACIS_DataRequest
 }
 
 
-// Development versions--not part of public interface yet.
-
 /**
  * A GridData request.
  */
@@ -331,22 +329,23 @@ class ACIS_GridDataRequest extends _ACIS_DataRequest
 /**
  * A General request.
  */
-class ACIS_GeneralRequest extends _ACIS_Request
+class ACIS_AreaMetaRequest extends _ACIS_Request
 {
     /**
-     * Initialize an ACIS_GeneralRequest object.
+     * Initialize an ACIS_AreaMetaRequest object.
      */    
-    public function __construct($area_type)
+    public function __construct($area)
     {
-        parent::__construct("General/{$area_type}");
+        parent::__construct("General/{$area}");
         $this->_params['meta'] = 'id';
         return;
     }
 
     /**
-     * Define the metadata fields for this request.
+     * Set the metadata fields for this request.
      *
-     * The fields parameter is a single string or an array of field names.
+     * For compatibility with AreaMetaResult the id field is requested by 
+     * default (see result.php)
      */
     public function metadata($fields)
     {
@@ -359,10 +358,13 @@ class ACIS_GeneralRequest extends _ACIS_Request
     }
  
     /**
-     * Define the state for the request.
+     * Set the state(s) for the request.
      */
     public function state($postal)
     {
+        if (is_string($postal)) {
+            $postal = array($postal);
+        }
         $this->_params['state'] = $postal;
         return;
     }

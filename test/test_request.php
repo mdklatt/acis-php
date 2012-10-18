@@ -86,3 +86,30 @@ class MultiStnDataRequestTest extends _RequestTest
         return;
     }
 }
+
+
+class AreaMetaRequestTest extends _RequestTest
+{
+    protected $_JSON_FILE = 'data/AreaMeta.json';
+    protected $_TEST_CLASS = 'ACIS_AreaMetaRequest';
+    
+    protected function setUp()
+    {
+        $testData = $this->_loadData();
+        $params = $testData['params'];
+        $result = $testData['result'];
+        $area = $testData['area'];
+        $this->_query = array('params' => $params, 'result' => $result);
+        $this->_request = new $this->_TEST_CLASS($area);
+        return;
+    }    
+
+    public function testSubmit()
+    {
+        $this->_request->state(array('OK'));
+        $this->_request->metadata(array('name'));
+        $query = $this->_request->submit();
+        $this->assertEquals($query['result'], $this->_query['result']);
+        return;
+    }
+}

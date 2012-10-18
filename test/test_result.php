@@ -187,3 +187,20 @@ class MultiStnDataResultTest extends _DataResultTest
         
     }
 }
+
+
+class AreaMetaResultTest extends _MetaResultTest
+{
+    protected $_JSON_FILE = 'data/AreaMeta.json';
+    protected $_RESULT_CLASS = 'ACIS_AreaMetaResult';
+
+    public function testNoId()
+    {
+        $message = 'metadata does not contain id';
+        $this->setExpectedException('ACIS_ResultException', $message);
+        unset($this->_query['result']['meta'][0]['id']);
+        new $this->_RESULT_CLASS($this->_query);
+        return;
+    }
+}
+

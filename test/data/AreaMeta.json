@@ -1,0 +1,6 @@
+{
+    "params":{"state":"ok","meta":"id,name"},
+    "result":{"meta":[{"id":"AMA","name":"Amarillo, TX"},{"id":"DDC","name":"Dodge City,KS"},{"id":"FWD","name":"Dallas/Fort Worth, TX"},{"id":"ICT","name":"Wichita,KS"},{"id":"OUN","name":"Norman/Oklahoma City, OK"},{"id":"SHV","name":"Shreveport, LA"},{"id":"TSA","name":"Tulsa, OK"}]},
+    "meta":{"AMA": {"name": "Amarillo, TX"},"DDC": {"name": "Dodge City,KS"},"FWD": {"name": "Dallas/Fort Worth, TX"},"ICT": {"name": "Wichita,KS"},"OUN": {"name": "Norman/Oklahoma City, OK"},"SHV": {"name": "Shreveport, LA"},"TSA": {"name": "Tulsa, OK"}},
+    "area":"cwa"
+}

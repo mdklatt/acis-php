@@ -303,3 +303,33 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
     }
 }
 
+
+/**
+ * A result from a AreaMeta call.
+ *
+ * The meta attribute is an associative aray keyed to the area id, so this
+ * field must be included in the result metadata. This is only for the result
+ * of an area General call, e.g. basin, county, etc.
+ */
+class ACIS_AreaMetaResult extends _ACIS_JsonResult
+{
+    public $meta = array();
+
+    /**
+     * Initialize an ACIS_AreaMetaResult object.
+     */
+    public function __construct($query)
+    {
+        parent::__construct($query);
+        foreach ($query['result']['meta'] as $area) {
+            if (!array_key_exists('id', $area)) {
+                $message = 'metadata does not contain id';
+                throw new ACIS_ResultException($message);
+            }
+            $id = $area['id'];
+            unset($area['id']);
+            $this->meta[$id] = $area;
+        }
+        return;
+    }
+}

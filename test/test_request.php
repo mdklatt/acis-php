@@ -106,7 +106,7 @@ class AreaMetaRequestTest extends _RequestTest
 
     public function testSubmit()
     {
-        $this->_request->state(array('OK'));
+        $this->_request->location(array('state' => 'OK'));
         $this->_request->metadata(array('name'));
         $query = $this->_request->submit();
         $this->assertEquals($query['result'], $this->_query['result']);

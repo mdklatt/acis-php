@@ -51,6 +51,19 @@ abstract class _ACIS_Request
     }
     
     /**
+     * Define the location options for this request.
+     *
+     * The options parameter is an associative array.
+     */
+    public function location($options)
+    {
+        foreach ($options as $key => $value) {
+            $this->_params[$key] = $value;
+        }
+        return;
+    }
+
+    /**
      * Define the metadata fields for this request.
      *
      * The fields parameter is a single string or an array of field names.
@@ -70,19 +83,6 @@ abstract class _ACIS_Request
  */ 
 abstract class _ACIS_PlaceTimeRequest extends _ACIS_Request
 {
-    /**
-     * Define the location options for this request.
-     *
-     * The options parameter is an associative array.
-     */
-    public function location($options)
-    {
-        foreach ($options as $key => $value) {
-            $this->_params[$key] = $value;
-        }
-        return;
-    }
-
     /**
      * Set the date range (inclusive) for this request.
      *
@@ -354,18 +354,6 @@ class ACIS_AreaMetaRequest extends _ACIS_Request
         }
         $fields[] = 'id';
         parent::metadata($fields);
-        return;
-    }
- 
-    /**
-     * Set the state(s) for the request.
-     */
-    public function state($postal)
-    {
-        if (is_string($postal)) {
-            $postal = array($postal);
-        }
-        $this->_params['state'] = $postal;
         return;
     }
 }

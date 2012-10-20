@@ -121,18 +121,6 @@ abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
     }
 
     /**
-     * Submit a request to the server.
-     */
-    public function submit()
-    {
-        // Add interval to each element before submitting request.
-        foreach ($this->_params['elems'] as &$elem) {
-            $elem['interval'] = $this->_interval;
-        }
-        return parent::submit();
-    }
-
-    /**
      * Set the interval for this request.
      *
      * The interval can be a name ("dly", "mly", or "yly") or a year, month,
@@ -141,6 +129,9 @@ abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
     public function interval($value)
     {
         $this->_interval = ACIS_validInterval($value);
+        foreach ($this->_params['elems'] as &$elem) {
+            $elem['interval'] = $this->_interval;
+        }
         return;
     }
 
@@ -153,6 +144,7 @@ abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
     public function addElement($ident, $options=array())
     {
         $elem = array_merge(ACIS_makeElement($ident), $options);
+        $options['interval'] = $this->_interval;
         $this->_params['elems'][] = $elem;
         return;
     }

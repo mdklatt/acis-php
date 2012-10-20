@@ -76,6 +76,14 @@ abstract class _ACIS_Request
         $this->_params["meta"] = array_unique($fields);
         return;
     }
+    
+    /**
+     * The parameters for the this request.
+     */
+    public function params()
+    {
+        return $this->_params;
+    }
 }
 
 /**

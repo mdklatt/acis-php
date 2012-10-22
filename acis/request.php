@@ -84,6 +84,15 @@ abstract class _ACIS_Request
     {
         return $this->_params;
     }
+    
+    /**
+     * The URL for the this request.
+     */
+    public function url()
+    {
+        // This is used by a RequestQueue.
+        return $this->_call->url;
+    }    
 }
 
 /**
@@ -151,8 +160,8 @@ abstract class _ACIS_DataRequest extends _ACIS_PlaceTimeRequest
      */
     public function addElement($ident, $options=array())
     {
-        $elem = array_merge(ACIS_makeElement($ident), $options);
         $options['interval'] = $this->_interval;
+        $elem = array_merge(ACIS_makeElement($ident), $options);
         $this->_params['elems'][] = $elem;
         return;
     }

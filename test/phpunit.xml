@@ -5,6 +5,7 @@
 			<file>test_call.php</file>
 			<file>test_date.php</file>
 			<file>test_exception.php</file>
+			<file>test_queue.php</file>
 			<file>test_request.php</file>
 			<file>test_result.php</file>
 			<file>test_stream.php</file>

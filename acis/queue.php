@@ -17,6 +17,26 @@
   */
 class ACIS_RequestQueue
 {
+    /**
+     * Convert a POST reply to a JSON result object.
+     */
+    static private function _result($reply)
+    {
+        list($code, $message) = $reply->status;
+        if ($code != ACIS_HTTP_OK) {
+            // This doesn't do the right thing for a "soft 404", e.g. an 
+            // ISP redirects to a custom error or search page for a DNS
+            // lookup failure and returns a 200 (OK) code.
+            if ($code == ACIS_HTTP_BAD) {
+                // If the ACIS server returns this code it also provides a
+                // helpful plain text error message.
+                throw new ACIS_RequestException($reply->content);
+            }
+            throw new RuntimeException("HTTP error: {$code} {$message}");
+        }
+        return json_decode($reply->content, true);
+    }
+
     public $results = array();
     
     private $_queue;
@@ -57,20 +77,8 @@ class ACIS_RequestQueue
     {
         $this->_queue->execute();
         foreach ($this->_queue->replies as $key => $reply) {
-            list($code, $message) = $reply->status;
-            if ($code != ACIS_HTTP_OK) {
-                // This doesn't do the right thing for a "soft 404", e.g. an 
-                // ISP redirects to a custom error or search page for a DNS
-                // lookup failure and returns a 200 (OK) code.
-                if ($code == ACIS_HTTP_BAD) {
-                    // If the ACIS server returns this code it also provides a
-                    // helpful plain text error message.
-                    throw new ACIS_RequestException($reply->content);
-                }
-                throw new RuntimeException("HTTP error: {$code} {$message}");
-            }
+            $result = self::_result($reply);
             list($params, $result_type) = $this->_queries[$key];
-            $result = json_decode($reply->content, true);
             $query = array('params' => $params, 'result' => $result);
             if ($result_type == null) {
                 $this->results[$key] = $query;
@@ -114,19 +122,26 @@ class _HttpReply
     }         
 } 
 
+
 /**
  * Execute HTTP POST requests asynchronously.
  */ 
 class _HttpPostRequestQueue
 {
     const CRLF = "\r\n";
-    
+    const BLOCK_SIZE = 1024;
+        
     public $replies = array();
     
     private $_streams = array();
-    private $_putBuffer = array();
-    private $_getBuffer = array();
+    private $_putbuf = array();
+    private $_getbuf = array();
     
+    /**
+     * Add a request to the queue.
+     *
+     * The request is made to 'url' using POST content 'data'.
+     */
     public function add($url, $data)
     {
         $url = parse_url($url);
@@ -137,9 +152,9 @@ class _HttpPostRequestQueue
         $post.= self::CRLF;
         $post.= $data;
         $fd = $this->_connect($url['host']);
-        $this->_putBuffer[$fd] = $post;
-        $this->_getBuffer[$fd] = '';
-        $this->results[$fd] = null;
+        $this->_putbuf[$fd] = $post;
+        $this->_getbuf[$fd] = '';
+        $this->replies[$fd] = null;  // make sure replies will be in order
         return $fd;
     }
     
@@ -153,17 +168,15 @@ class _HttpPostRequestQueue
         while (count($this->_streams) > 0)
         {
             $readers = $writers = $errors = $this->_streams;
-            stream_select($reader, $writers, $errors, 0);
+            stream_select($readers, $writers, $errors, 0);
             foreach ($writers as $stream) {
                 $this->_put($stream);
             }
             foreach ($readers as $stream) {
-                if ($this->_get($stream) == 0) {  // EOF
-                    $fd = (int)$stream;
-                    @fclose($this->_streams[$fd]);
-                    unset($this->_streams[$fd]);
-                    $this->replies[$fd] = new _HttpReply(
-                        $this->_getBuffer[$fd]);
+                $this->_get($stream);
+                if (feof($stream)) {
+                    unset($this->_streams[(int)$stream]);
+                    $this->_eof($stream);
                 }
             }
         }
@@ -180,8 +193,10 @@ class _HttpPostRequestQueue
         if (!$stream) {
             throw new RuntimeException($errstr);            
         }
+        stream_set_blocking($stream, 0);
         $fd = (int)$stream;
         $this->_streams[$fd] = $stream;
+        $this->results[$fd] = null;  // make sure results are stored in order
         return $fd;
     }
     
@@ -190,8 +205,11 @@ class _HttpPostRequestQueue
      */   
     private function _put($stream)
     {
-        $data = &$this->_putBuffer[(int)$stream];
-        $len = fputs($stream, $data);
+        $data = &$this->_putbuf[(int)$stream];
+        if (strlen($data) == 0) {
+            return 0;
+        }
+        $len = fwrite($stream, $data, self::BLOCK_SIZE);
         $data = substr($data, $len);
         return $len;
     }
@@ -201,10 +219,22 @@ class _HttpPostRequestQueue
      */
     private function _get($stream)
     {
-        $data = fgets($stream);
+        $fd = (int)$stream;
+        $data = fread($stream, self::BLOCK_SIZE);
         if (($len = strlen($data)) > 0) {
-            $this->_getBuffer[(int)$stream].= $data;
+            $this->_getbuf[(int)$stream].= $data;
         }
         return $len;
     }
+    
+    /**
+     * Close the remote connection and store the reply 
+     */
+     private function _eof(&$stream)
+     {
+         $fd = (int)$stream;
+         @fclose($stream);
+         $this->replies[$fd] = new _HttpReply($this->_getbuf[$fd]);
+         return;
+     }
 }

@@ -106,7 +106,7 @@ class ACIS_StnMetaResult extends _ACIS_JsonResult
  * the ACIS site UID, so this field must be included in the result metadata.
  */
 abstract class _ACIS_DataResult extends _ACIS_JsonResult 
-    implements Countable, Iterator
+implements Countable, Iterator
 {
     public $meta = array();
     public $data = array();
@@ -332,4 +332,123 @@ class ACIS_AreaMetaResult extends _ACIS_JsonResult
         }
         return;
     }
+}
+
+/**
+ * A result from a GridData call.
+ * 
+ * If a "loc" point value was used to make the GridData call the meta, data,
+ * and smry attributes will contain scalar values rather than rasters (2D 
+ * arrays). In cases where a raster is desired use "bbox" instead to retrieve
+ * 1x1 arrays:
+ *    loc(lon, lat) => bbox(lon, lat, lon, lat) 
+ */
+class ACIS_GridDataResult extends _ACIS_JsonResult
+implements Countable, Iterator
+{
+    /**
+     * Initialize an ACIS_GridDataResult object.
+     */
+    public function __construct($query)
+    {
+        parent::__construct($query);
+        $result = $query['result'];
+        $this->meta = ($meta = @$result['meta']) ? $meta : array();
+        $this->data = ($data = @$result['data']) ? $data : array();
+        $this->smry = ($smry = @$result['smry']) ? $smry : array();
+        if (!$this->data) {
+            $this->shape = array(0, 0);
+        }
+        elseif (is_array($elem = $this->data[0][1])) {  // 2D array
+            $this->shape = array(count($elem), count($elem[0]));
+        }
+        else {  // 1D array
+            $this->shape = array(1, 1);
+        } 
+        return;
+    }
+    
+    // Implemenation of the Countable interface. 
+    
+    /**
+     * Return the total number of data records in this result. 
+     */
+    public function count()
+    {
+        list($nx, $ny) = $this->shape;
+        return $nx * $nx * count($this->data);
+    }
+    
+    // Implemenation of the Iterable interface. 
+    
+    private $_dataIter;
+    private $_xposIter;
+    private $_yposIter;
+    
+    /**
+     * Reset the iterator to the first record.
+     */
+    public function rewind()
+    {
+        list($nx, $ny) = $this->shape;
+        $this->_dataIter = new ArrayIterator($this->data);
+        $this->_xposIter = new ArrayIterator(range(0, $nx-1));
+        $this->_yposIter = new ArrayIterator(range(0, $ny-1));
+        return;
+    }
+    
+    /**
+     * Advance to the next record.
+     */
+    public function next()
+    {
+        $this->_xposIter->next();
+        if (!$this->_xposIter->valid()) {
+            $this->_xposIter->rewind();
+            $this->_yposIter->next();
+        }
+        if (!$this->_yposIter->valid()) {
+            $this->_yposIter->rewind();
+            $this->_dataIter->next();
+        }
+        return;
+    }
+    
+    /**
+     * Return the current record.
+     *
+     * The returned value is an array of the form ((j, i), date, elem1, ...)
+     */
+    public function current()
+    {
+        $pos = $this->key();
+        $day = $this->_dataIter->current();
+        $record = array($pos, $day[0]);
+        $elems = array_slice($day, 1);
+        list($j, $i) = $pos;
+        for ($n = 0; $n < count($elems); ++$n) {           
+            $record[] = is_array($elems[$n]) ? $elems[$n][$j][$i] : $elems[$n];
+        }
+        return $record;
+    }
+    
+    /**
+     * Return the current array key.
+     *
+     * This is the current grid position (j, i) and thus is not unique for all
+     * records.
+     */
+    public function key()
+    {
+        return array($this->_yposIter->current(), $this->_xposIter->current());
+    }
+    
+    /**
+     * Return true if the iterator points to a valid array position.
+     */
+    public function valid()
+    {
+        return $this->_dataIter->valid();
+    }
+    
 }

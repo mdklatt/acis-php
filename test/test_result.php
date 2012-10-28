@@ -150,8 +150,7 @@ class StnDataResultTest extends _DataResultTest
         foreach ($result as $record) {
             $this->assertTrue(false);  // data should be empty
         }
-        return;
-        
+        return;        
     }
 }
 
@@ -204,3 +203,93 @@ class AreaMetaResultTest extends _MetaResultTest
     }
 }
 
+
+class GridDataResultTest extends _MetaResultTest
+{
+    protected $_JSON_FILE = 'data/GridData.json';
+    protected $_RESULT_CLASS = 'ACIS_GridDataResult';
+
+    protected $_data;
+    protected $_smry;
+    protected $_fields;
+    protected $_records;
+    protected $_query;
+    protected $_elems;
+    protected $_shape;
+    
+    protected function setUp()
+    {
+        $testData = $this->_loadData();
+        $params = $testData['params'];
+        $result = $testData['result'];
+        $this->_query = array('params' => $params, 'result' => $result);
+        $this->_meta = $testData['meta'];
+        $this->_data = $testData['data'];
+        $this->_smry = $testData['smry'];
+        $this->_records = $testData['records'];
+        $this->_elems = $testData['elems'];
+        $this->_shape = $testData['shape'];
+        return;
+    }
+
+    public function testData()
+    {
+        $result = new $this->_RESULT_CLASS($this->_query);
+        foreach ($result->data as $uid => $data) {
+            $this->assertEquals($data, $this->_data[$uid]);
+        }
+        return;
+    }
+
+    public function testSmry()
+    {
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals($this->_smry, $result->smry);
+        return;
+    }
+
+    /**
+     * Test a smry_only result.
+     */
+    public function testSmryOnly()
+    {
+        unset($this->_query['result']['data']);
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals($this->_smry, $result->smry);
+        foreach ($result as $record) {
+            $this->assertTrue(false);  // data should be empty
+        }
+        return;
+        
+    }
+
+    public function testShape()
+    {
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals($this->_shape, $result->shape);
+    }
+    
+    public function testElems()
+    {
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals($this->_elems, $result->elems());
+    }
+
+    public function testCount()
+    {
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $this->assertEquals(count($result), count($this->_records));
+    }
+
+    public function testIter()
+    {
+        $result = new $this->_RESULT_CLASS($this->_query);
+        $i = 0;
+        foreach ($result as $record) {
+            $this->assertEquals($this->_records[$i], $record);
+            ++$i;
+        }
+        $this->assertEquals(count($result), $i);
+        return;
+    }
+}

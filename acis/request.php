@@ -325,6 +325,20 @@ class ACIS_GridDataRequest extends _ACIS_DataRequest
     }
  
     /**
+     * Set the date range (inclusive) for this request.
+     *
+     * GridData does not accept period of record ("por").
+     */ 
+    public function dates($sdate, $edate=null)
+    {
+        if (strcasecmp('por', $sdate) == 0 or strcasecmp('por', $edate) == 0) {
+            throw new ACIS_RequestException('GridData does not accept POR');
+        }
+        parent::dates($sdate, $edate);
+        return;
+    }
+
+    /**
      * Define the grid for this request.
      */
     public function grid($id)
@@ -336,7 +350,7 @@ class ACIS_GridDataRequest extends _ACIS_DataRequest
 
 
 /**
- * A General request.
+ * A General request for area metadata.
  */
 class ACIS_AreaMetaRequest extends _ACIS_Request
 {

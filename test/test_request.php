@@ -55,6 +55,15 @@ class StnDataRequestTest extends _RequestTest
     protected $_JSON_FILE = 'data/StnData.json';
     protected $_TEST_CLASS = 'ACIS_StnDataRequest';
     
+    public function testInterval()
+    {
+        $this->_request->interval('dly');
+        $this->_request->interval('mly');
+        $this->_request->interval('yly');
+        $this->_request->interval(array(1, 0, 0));
+        $this->assertTrue(true);
+    }
+
     public function testSubmit()
     {
         $this->_request->location(array('sid'=>'okc'));
@@ -74,6 +83,15 @@ class MultiStnDataRequestTest extends _RequestTest
     protected $_JSON_FILE = 'data/MultiStnData.json';
     protected $_TEST_CLASS = 'ACIS_MultiStnDataRequest';
     
+    public function testInterval()
+    {
+        $this->_request->interval('dly');
+        $this->_request->interval('mly');
+        $this->_request->interval('yly');
+        $this->_request->interval(array(1, 0, 0));
+        $this->assertTrue(true);
+    }
+
     public function testSubmit()
     {
         $this->_request->location(array('sids'=>'okc,tul'));
@@ -108,6 +126,35 @@ class AreaMetaRequestTest extends _RequestTest
     {
         $this->_request->location(array('state' => 'OK'));
         $this->_request->metadata(array('name'));
+        $query = $this->_request->submit();
+        $this->assertEquals($query['result'], $this->_query['result']);
+        return;
+    }
+}
+
+
+class GridDataRequestTest extends _RequestTest
+{
+    protected $_JSON_FILE = 'data/GridData.json';
+    protected $_TEST_CLASS = 'ACIS_GridDataRequest';
+    
+    public function testInterval()
+    {
+        $this->_request->interval('dly');
+        $this->_request->interval('mly');
+        $this->_request->interval('yly');
+        $this->_request->interval(array(1, 0, 0));
+        $this->assertTrue(true);
+    }
+    
+    public function testSubmit()
+    {
+        $this->_request->location(array('bbox' => array(-97.05,35,-97,35.05)));
+        $this->_request->metadata(array('ll'));
+        $this->_request->grid(1);
+        $this->_request->dates('2012-01-01', '2012-01-02');
+        $this->_request->addElement(1, array('smry' => 'max'));        
+        $this->_request->addElement('mint', array('smry' => 'min'));
         $query = $this->_request->submit();
         $this->assertEquals($query['result'], $this->_query['result']);
         return;

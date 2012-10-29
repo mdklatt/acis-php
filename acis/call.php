@@ -68,8 +68,8 @@ class ACIS_WebServicesCall
             throw new RuntimeException('JSON encoding of params failed');
         } 
         $stream = $this->_post(http_build_query(array('params' => $json)));
-        if (array_key_exists('output', $params) && 
-                strtolower($params['output']) != 'json') {
+        $output = ACIS_arrayGetKey($params, 'output', 'json');
+        if (strtolower($output) != 'json') {        
             return $stream;
         }
         if (!($result = json_decode(stream_get_contents($stream), true))) {

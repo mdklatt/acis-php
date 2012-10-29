@@ -58,7 +58,7 @@ function ACIS_dateString($date)
         'yly' => array(1, 0, 0),
     );
     if (is_string($interval)) {
-        if (($interval = @$named_deltas[$interval]) === null) {
+        if (!($interval = ACIS_arrayGetKey($named_deltas, $interval))) {
             throw new InvalidArgumentException("invalid interval: {$interval}");            
         }
     }

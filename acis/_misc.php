@@ -121,12 +121,49 @@ function ACIS_validInterval($value)
  */
 function ACIS_dateSpan($params)
 {
-    if (($sdate = @$params["sdate"]) === null) {
+    if (!($sdate = ACIS_arrayGetKey($params, "sdate"))) {
         $sdate = $params["date"];
     }
-    if (($interval = @$params["elems"][0]["interval"]) === null) {
+    if (!($interval = ACIS_arrayGetKey($params["elems"][0], "interval"))) {
         $interval = "dly";
     }
-    $edate = @$params["edate"];  // default is null
+    $edate = ACIS_arrayGetKey($params, "edate");
     return array($sdate, $edate, $interval);
+}
+
+
+/**
+ * Return array value by key or default value if key doesn't exist.
+ */
+function ACIS_arrayGetKey($arr, $key, $default=null)
+{
+    return array_key_exists($key, $arr) ? $arr[$key] : $default;
+}
+
+
+/**
+ * Return array value by key and remove the key from the array.
+ *
+ * The default is returned if key is not in arr. If arr is an indexed array it
+ * will need to be reindexed.
+ */
+function ACIS_arrayPopKey(&$arr, $key, $default=null)
+{
+	$value = $default;
+	if (array_key_exists($key, $arr)) {
+		$value = $arr[$key];
+		unset($arr[$key]);
+	}
+	return $value;
+}
+
+/**
+ * Return array value by key and set to default if key doesn't already exist.
+ */
+function ACIS_arraySetKey(&$arr, $key, $default=null)
+{
+    if (!array_key_exists($key, $arr)) {
+        $arr[$key] = $default;
+    }
+    return $arr[$key];
 }

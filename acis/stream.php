@@ -188,8 +188,8 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
      public function location($options) 
      {
         foreach (array('sid', 'uid') as $key) {
-            if (array_key_exists($key, $options)) {
-                $this->_sid = $this->_params[$key] = $options[$key];
+            if ($location = ACIS_arrayGetKey($options, $key)) {
+                $this->_sid = $this->_params[$key] = $location;
                 return;
             }
         }
@@ -233,7 +233,7 @@ class ACIS_StnDataStream extends _ACIS_CsvStream
     public function current()
     {
         $record = explode(',', $this->_current);
-        array_unshift($record, $this->_sid);
+        array_splice($record, 0, 0, array($this->_sid));
         return $record;
     }           
 }

@@ -55,7 +55,7 @@ abstract class _ACIS_JsonResult
         }
         
         // Define elements.
-        if (($elems = @$query['params']['elems'])) {
+        if (($elems = ACIS_arrayGetKey($query['params'], 'elems'))) {
             $aliases = array();
             foreach (array_map('ACIS_makeElement', $elems) as $elem) {
                 $aliases[] = $elem['alias'];
@@ -90,9 +90,7 @@ class ACIS_StnMetaResult extends _ACIS_JsonResult
                 $message = 'metadata does not contain uid';
                 throw new ACIS_ResultException($message);
             }
-            $uid = $site['uid'];
-            unset($site['uid']);
-            $this->meta[$uid] = $site;
+            $this->meta[ACIS_arrayPopKey($site, 'uid')] = $site;
         }
         return;
     }
@@ -208,11 +206,10 @@ class ACIS_StnDataResult extends _ACIS_DataResult
             $message = 'metadata does not contain uid';
             throw new ACIS_ResultException($message);
         }
-        $uid = $result['meta']['uid'];
-        unset($result['meta']['uid']);
+        $uid = ACIS_arrayPopKey($result['meta'], 'uid');
         $this->meta[$uid] = $result['meta'];
-        $this->data[$uid] = ($data = @$result['data']) ? $data : array();
-        $this->smry[$uid] = ($smry = @$result['smry']) ? $smry : array();
+        $this->data[$uid] = ACIS_arrayGetKey($result, 'data', array());
+        $this->smry[$uid] = ACIS_arrayGetKey($result, 'smry', array());
         return;
     }
 
@@ -224,7 +221,7 @@ class ACIS_StnDataResult extends _ACIS_DataResult
     public function current()
     {
         $record = $this->_dataIter->current();
-        array_unshift($record, $this->key());  // prepend uid
+        array_splice($record, 0, 0, array($this->key()));
         return $record;
     }
 }
@@ -251,8 +248,8 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
                 $message = 'metadata does not contain uid';
                 throw new ACIS_ResultException($message);
             }
-            $uid = $site['meta']['uid'];
-            unset ($site['meta']['uid']);
+            
+            $uid = ACIS_arrayPopKey($site['meta'], 'uid');
             $this->meta[$uid] = $site['meta'];
             // For single-date requests MultiStnData returns the one record for
             // each site as a 1D array instead of a 2D array. (StnData returns
@@ -260,8 +257,8 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
             if (count($dates) == 1 and array_key_exists('data', $site)) {
                 $site['data'] = array($site['data']);
             }
-            $this->data[$uid] = ($data = @$site['data']) ? $data : array();
-            $this->smry[$uid] = ($smry = @$site['smry']) ? $smry : array();
+            $this->data[$uid] = ACIS_arrayGetKey($site, 'data', array());
+            $this->smry[$uid] = ACIS_arrayGetKey($site, 'smry', array());
         }
         return;
     }
@@ -274,8 +271,8 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
     public function current()
     {
         $record = $this->_dataIter->current();
-        array_unshift($record, $this->_dateIter->current());
-        array_unshift($record, $this->key());
+        $header = array($this->key(), $this->_dateIter->current());
+        array_splice($record, 0, 0, $header);
         return $record;
     }
 
@@ -326,8 +323,7 @@ class ACIS_AreaMetaResult extends _ACIS_JsonResult
                 $message = 'metadata does not contain id';
                 throw new ACIS_ResultException($message);
             }
-            $id = $area['id'];
-            unset($area['id']);
+            $id = ACIS_arrayPopKey($area, 'id');
             $this->meta[$id] = $area;
         }
         return;
@@ -353,9 +349,9 @@ implements Countable, Iterator
     {
         parent::__construct($query);
         $result = $query['result'];
-        $this->meta = ($meta = @$result['meta']) ? $meta : array();
-        $this->data = ($data = @$result['data']) ? $data : array();
-        $this->smry = ($smry = @$result['smry']) ? $smry : array();
+        $this->meta = ACIS_arrayGetKey($result, 'meta', array());
+        $this->data = ACIS_arrayGetKey($result, 'data', array());
+        $this->smry = ACIS_arrayGetKey($result, 'smry', array());
         if (!$this->data) {
             $this->shape = array(0, 0);
         }

@@ -17,7 +17,7 @@ function ACIS_sidsTable($sids)
             throw new InvalidArgumentException("invalid sid: {$sid}");
         }
         list(, $ident, $code) = $matches;
-        if (($sid_type = @$SID_TYPES[$code]) === null) {
+        if (!($sid_type = ACIS_arrayGetKey($SID_TYPES, $code))) {
             throw new InvalidArgumentException("invalid sid type: {$code}");
         }
         $table[$sid_type] = $ident;

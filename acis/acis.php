@@ -9,7 +9,7 @@
  * This library uses the Semantic Versioning scheme:
  *     <http://semver.org>
  */
-define('ACIS_VERSION', '0.2.0x');
+define('ACIS_VERSION', '0.2.0');
 
 require 'date.php';
 require 'exception.php';

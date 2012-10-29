@@ -338,3 +338,45 @@ foreach ($result->meta as $uid => $info) {
     print "{$sid}: {$info['name']}".PHP_EOL;
 }
 print str_repeat('-', 40).PHP_EOL;
+
+
+/*
+*** Using a RequestQueue ***
+
+Requests can be executed in parallel on the ACIS server using a RequestQueue.
+This should help performance when the server is the bottleneck. This example
+will find the all-time record high temperature for August for Oklahoma City.
+Each day of the month is a separate request. Normal execution would require
+waiting for each request to be completed by the server before the next one
+is executed. However, by submitting each request simultaneously, the server
+can process each one in parallel.
+
+This is an experimental feature at this point. USE AT YOUR OWN RISK.
+
+*/
+print 'EXAMPLE 11'.PHP_EOL;
+require_once '../acis/queue.php';  // not part of the standard library
+
+$request = new ACIS_StnDataRequest();
+$request->location(array('sid' => 'OKC'));
+$request->metadata(array('name'));
+$request->interval(array(1, 0, 0));
+$request->addElement('maxt', array('smry' => 'max', 'smry_only' => 1));
+$queue = new ACIS_RequestQueue();
+foreach (range(1, 31) as $mday) {
+    $sdate = sprintf('1890-08-%02d', $mday);
+    $edate = sprintf('2012-08-%02d', $mday);
+    $request->dates($sdate, $edate);
+    $queue->add($request, 'ACIS_StnDataResult');
+}
+$queue->execute();
+$mday = 1;
+foreach ($queue->results as $result) {
+    foreach ($result->smry as $uid => $site) {
+        $name = $result->meta[$uid]['name'];
+        $maxt = $site[0];
+    }
+    echo "At {$name} the record high for August {$mday} is {$maxt}F.".PHP_EOL;
+    ++$mday;
+}
+print str_repeat('-', 40).PHP_EOL;

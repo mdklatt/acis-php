@@ -9,8 +9,19 @@
 function ACIS_sidsTable($sids)
 {
     $SID_REGEX = '/^([^ ]*) (\d+)$/';
-    $SID_TYPES = array(1=>'WBAN', 'COOP', 'FAA', 'WMO', 'ICAO', 'GHCN',
-        'NWSLI', 'RCC', 'ThreadEx', 'CoCoRaHS');
+    $SID_TYPES = array(
+          1 => 'WBAN',
+          2 => 'COOP',
+          3 => 'FAA',
+          4 => 'WMO',
+          5 => 'ICAO', 
+          6 => 'GHCN',
+          7 => 'NWSLI', 
+          8 => 'RCC', 
+          9 => 'ThreadEx',
+         10 => 'CoCoRaHS',
+         29 => 'SNOTEL',
+    );
     $table = array();
     foreach ($sids as $sid) {
         if (!preg_match($SID_REGEX, $sid, $matches)) {

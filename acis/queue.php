@@ -87,6 +87,7 @@ class ACIS_RequestQueue
                 $this->results[$key] = new $result_type($query);
             }
         }
+		$this->results = array_values($this->results);  // make keys sequential
         return;
     }
 }

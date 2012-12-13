@@ -210,6 +210,7 @@ class ACIS_StnDataResult extends _ACIS_DataResult
         $this->meta[$uid] = $result['meta'];
         $this->data[$uid] = ACIS_arrayGetKey($result, 'data', array());
         $this->smry[$uid] = ACIS_arrayGetKey($result, 'smry', array());
+        $this->rewind();
         return;
     }
 
@@ -260,6 +261,7 @@ class ACIS_MultiStnDataResult extends _ACIS_DataResult
             $this->data[$uid] = ACIS_arrayGetKey($site, 'data', array());
             $this->smry[$uid] = ACIS_arrayGetKey($site, 'smry', array());
         }
+        $this->rewind();
         return;
     }
 
@@ -360,7 +362,8 @@ implements Countable, Iterator
         }
         else {  // 1D array
             $this->shape = array(1, 1);
-        } 
+        }
+        $this->rewind(); 
         return;
     }
     

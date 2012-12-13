@@ -149,12 +149,12 @@ function ACIS_arrayGetKey($arr, $key, $default=null)
  */
 function ACIS_arrayPopKey(&$arr, $key, $default=null)
 {
-	$value = $default;
-	if (array_key_exists($key, $arr)) {
-		$value = $arr[$key];
-		unset($arr[$key]);
-	}
-	return $value;
+    $value = $default;
+    if (array_key_exists($key, $arr)) {
+        $value = $arr[$key];
+        unset($arr[$key]);
+    }
+    return $value;
 }
 
 /**

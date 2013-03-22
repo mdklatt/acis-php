@@ -124,9 +124,7 @@ function ACIS_dateSpan($params)
     if (!($sdate = ACIS_arrayGetKey($params, "sdate"))) {
         $sdate = $params["date"];
     }
-    if (!($interval = ACIS_arrayGetKey($params["elems"][0], "interval"))) {
-        $interval = "dly";
-    }
+    $interval = ACIS_arrayGetKey($params['elems'][0], 'interval', 'dly');
     $edate = ACIS_arrayGetKey($params, "edate");
     return array($sdate, $edate, $interval);
 }
@@ -156,6 +154,7 @@ function ACIS_arrayPopKey(&$arr, $key, $default=null)
     }
     return $value;
 }
+
 
 /**
  * Return array value by key and set to default if key doesn't already exist.

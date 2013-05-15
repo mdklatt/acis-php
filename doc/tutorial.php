@@ -132,7 +132,7 @@ September 1, 2012.
 print 'EXAMPLE 4'.PHP_EOL;
 $request = new ACIS_StnDataRequest();
 $request->location(array('sid' => 'OKC'));
-$request->dates('2012-09-01', 'por');
+$request->dates('2013-05-01', 'por');
 $request->addElement('maxt', array());
 $request->addElement('mint', array());
 $request->metadata(array('name'));
@@ -335,7 +335,7 @@ foreach ($result->meta as $uid => $info) {
     if (($sid = @$table['CoCoRaHS']) === null) {
         continue;
     }
-    print "{$sid}: {$info['name']}".PHP_EOL;
+    print "{$sid[0]}: {$info['name']}".PHP_EOL;
 }
 print str_repeat('-', 40).PHP_EOL;
 

@@ -132,6 +132,7 @@ function ACIS_dateSpan($params)
 
 /**
  * Return array value by key or default value if key doesn't exist.
+ *
  */
 function ACIS_arrayGetKey($arr, $key, $default=null)
 {
@@ -158,8 +159,9 @@ function ACIS_arrayPopKey(&$arr, $key, $default=null)
 
 /**
  * Return array value by key and set to default if key doesn't already exist.
+ *
  */
-function ACIS_arraySetKey(&$arr, $key, $default=null)
+function &ACIS_arraySetKey(&$arr, $key, $default=null)
 {
     if (!array_key_exists($key, $arr)) {
         $arr[$key] = $default;

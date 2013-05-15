@@ -8,7 +8,6 @@
  */
 require_once '_env.php';
 
-
 $config = count($argv) > 1 ? $argv[1] : 'phpunit.xml';
 $cmd = "phpunit --configuration {$config}";
 system($cmd, $status);

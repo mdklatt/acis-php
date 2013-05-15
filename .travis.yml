@@ -22,4 +22,4 @@ script: php -f test/test_acis.php
 branches:
     only:
         - master
-        - dev-0.2
+        - dev

@@ -9,18 +9,10 @@
 function ACIS_sidsTable($sids)
 {
     $SID_REGEX = '/^([^ ]*) (\d+)$/';
-    $SID_TYPES = array(
-          1 => 'WBAN',
-          2 => 'COOP',
-          3 => 'FAA',
-          4 => 'WMO',
-          5 => 'ICAO', 
-          6 => 'GHCN',
-          7 => 'NWSLI', 
-          8 => 'RCC', 
-          9 => 'ThreadEx',
-         10 => 'CoCoRaHS',
-         29 => 'SNOTEL',
+    $SID_TYPES = array(        
+         1 => 'WBAN',      2 => 'COOP',      3 => 'FAA',       4 => 'WMO',       
+         5 => 'ICAO',      6 => 'GHCN',      7 => 'NWSLI',     8 => 'RCC',  
+         9 => 'ThreadEx',  9 => 'ThreadEx', 10 => 'CoCoRaHS', 29 => 'SNOTEL',
     );
     $table = array();
     foreach ($sids as $sid) {
@@ -31,7 +23,8 @@ function ACIS_sidsTable($sids)
         if (!($sid_type = ACIS_arrayGetKey($SID_TYPES, $code))) {
             throw new InvalidArgumentException("invalid sid type: {$code}");
         }
-        $table[$sid_type] = $ident;
+        $sid_list = &ACIS_arraySetKey($table, $sid_type, array());
+        $sid_list[] = $ident;
     }
     return $table;
 }

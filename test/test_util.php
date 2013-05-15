@@ -14,10 +14,14 @@ class SidsTableFunctionTest extends PHPUnit_Framework_TestCase
     {
         /**
          * Test normal operation.
+         *
          */
-         $sids = array('13967 1', '346661 2');
-         $table = array('WBAN' => '13967', 'COOP' => '346661');
-         $this->assertEquals($table, ACIS_sidsTable($sids));
-         return;
+        $sids = array('13967 1', '346661 2', '346664 2');
+        $table = array(
+            'WBAN' => array('13967'), 
+            'COOP' => array('346661', '346664')
+        );
+        $this->assertEquals($table, ACIS_sidsTable($sids));
+        return;
     }
 }

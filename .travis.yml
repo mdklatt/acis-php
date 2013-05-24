@@ -1,6 +1,6 @@
 # Travis CI configuration for the acis library.
 #
-# The Travis CI service verifies each GitHub commit for correctness.
+# Travis CI is a continuous integration service for GitHub.
 # <http://travis-ci.org>
 
 
@@ -14,7 +14,7 @@ php:
 
 # Test script
 
-script: php -f test/test_acis.php
+script: php -f test/run_tests.php
 
 
 # Branch restrictions

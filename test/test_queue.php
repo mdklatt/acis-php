@@ -63,4 +63,15 @@ class RequestQueueTest extends PHPUnit_Framework_TestCase
         }
         return;
     }
+    
+    public function testClear()
+    {
+        $queue = new ACIS_RequestQueue();
+        $queue->add($this->_request);
+        $queue->execute();
+        $queue->clear();
+        $queue->execute();
+        $this->assertEquals(0, count($queue->results));
+        return;
+    }
 }

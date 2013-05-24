@@ -37,17 +37,18 @@ class ACIS_RequestQueue
         return json_decode($reply->content, true);
     }
 
-    public $results = array();
+    public $results;
     
     private $_queue;
-    private $_queries = array();
+    private $_queries;
     
     /**
      * Initialize a RequestQueue object.
      */
     public function __construct()
     {
-        $this->_queue = new _HttpPostRequestQueue();
+        $this->clear();
+        return;
     }
     
     /**
@@ -88,6 +89,18 @@ class ACIS_RequestQueue
             }
         }
         $this->results = array_values($this->results);  // make keys sequential
+        return;
+    }
+
+    /**
+     * Clear all Requests in the queue.
+     *
+     */
+    public function clear()
+    {
+        $this->_queue = new _HttpPostRequestQueue();
+        $this->_queries = array();
+        $this->results = array();
         return;
     }
 }

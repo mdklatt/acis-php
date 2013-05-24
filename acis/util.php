@@ -12,7 +12,8 @@ function ACIS_decodeSids($sids)
     $SID_TYPES = array(        
          1 => 'WBAN',      2 => 'COOP',      3 => 'FAA',       4 => 'WMO',       
          5 => 'ICAO',      6 => 'GHCN',      7 => 'NWSLI',     8 => 'RCC',  
-         9 => 'ThreadEx',  9 => 'ThreadEx', 10 => 'CoCoRaHS', 29 => 'SNOTEL',
+         9 => 'ThreadEx',  9 => 'ThreadEx', 10 => 'CoCoRaHS', 16 => 'AWDN',
+        29 => 'SNOTEL',
     );
     $table = array();
     foreach ($sids as $sid) {

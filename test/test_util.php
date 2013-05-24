@@ -8,7 +8,7 @@
 require_once 'acis.php';
 
 
-class SidsTableFunctionTest extends PHPUnit_Framework_TestCase
+class DecodeSidsFunctionTest extends PHPUnit_Framework_TestCase
 {
     public function testNormal()
     {
@@ -21,7 +21,7 @@ class SidsTableFunctionTest extends PHPUnit_Framework_TestCase
             'WBAN' => array('13967'), 
             'COOP' => array('346661', '346664')
         );
-        $this->assertEquals($table, ACIS_sidsTable($sids));
+        $this->assertEquals($table, ACIS_decodeSids($sids));
         return;
     }
 }

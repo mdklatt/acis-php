@@ -6,7 +6,7 @@
  *
  * The sids parameter is an array of SIDs from ACIS metadata.
  */
-function ACIS_sidsTable($sids)
+function ACIS_decodeSids($sids)
 {
     $SID_REGEX = '/^([^ ]*) (\d+)$/';
     $SID_TYPES = array(        

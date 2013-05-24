@@ -9,8 +9,7 @@
  */
 function ACIS_decodeSids($sids)
 {
-    $SID_REGEX = '/^([^ ]*) (\d+)$/';
-    $NETWORK_TYPES = array(        
+    $network_types = array(        
          1 => 'WBAN',      2 => 'COOP',      3 => 'FAA',       4 => 'WMO',       
          5 => 'ICAO',      6 => 'GHCN',      7 => 'NWSLI',     8 => 'RCC',  
          9 => 'ThreadEx',  9 => 'ThreadEx', 10 => 'CoCoRaHS', 16 => 'AWDN',
@@ -18,11 +17,11 @@ function ACIS_decodeSids($sids)
     );
     $table = array();
     foreach ($sids as $sid) {
-        if (!preg_match($SID_REGEX, $sid, $matches)) {
-            throw new InvalidArgumentException("invalid sid: {$sid}");
+        @list($ident, $ntype) = explode(" ", $sid);
+        if ($ntype === null) {
+            throw new InvalidArgumentException("invalid sid: {$sid}"); 
         }
-        list(, $ident, $ntype) = $matches;
-        $network = ACIS_arrayGetKey($NETWORK_TYPES, $ntype, $ntype);
+        $network = ACIS_arrayGetKey($network_types, $ntype, $ntype);
         $sid_list = &ACIS_arraySetKey($table, $network, array());
         $sid_list[] = $ident;
     }

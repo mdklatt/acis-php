@@ -25,4 +25,15 @@ class DecodeSidsFunctionTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($decoded, ACIS_decodeSids($encoded));
         return;
     }
+
+    /**
+     * Test for exception with invalid SID.
+     *
+     */
+    public function testInvalidSid()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        ACIS_decodeSids(array('13967'));  // missing network type
+        return;
+    }
 }

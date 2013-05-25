@@ -120,7 +120,7 @@ class ACIS_RequestQueue
  */ 
 class _HttpReply
 {
-    const CRLF = "\r\n";
+    const _CRLF = "\r\n";
     
     public $status;
     public $content;
@@ -131,7 +131,7 @@ class _HttpReply
      */     
     public function __construct($data)
     {
-        $lines = explode(self::CRLF, $data);
+        $lines = explode(self::_CRLF, $data);
         list(, $code, $message) = explode(' ', $lines[0], 3);
         $this->status = array((int)$code, trim($message));
         for ($pos = 1; $pos < count($lines); ++$pos) {
@@ -141,19 +141,19 @@ class _HttpReply
                 break;
             }
         }
-        $this->content = implode(self::CRLF, array_slice($lines, $pos));
+        $this->content = implode(self::_CRLF, array_slice($lines, $pos));
         return;            
     }         
 } 
 
 
 /**
- * Execute HTTP POST requests asynchronously.
+ * Execute HTTP POST requests asynchronously.__CRLF
  */ 
 class _HttpPostRequestQueue
 {
-    const CRLF = "\r\n";
-    const BLOCK_SIZE = 1024;
+    const _CRLF = "\r\n";
+    const _BLOCK_SIZE = 1024;
         
     public $replies = array();
     
@@ -170,10 +170,10 @@ class _HttpPostRequestQueue
     {
         $url = parse_url($url);
         $len = strlen($data);
-        $post = "POST {$url['path']} HTTP/1.0".self::CRLF;
-        $post.= 'Content-Type: application/x-www-form-urlencoded'.self::CRLF;
-        $post.= "Content-Length: {$len}".self::CRLF;
-        $post.= self::CRLF;
+        $post = "POST {$url['path']} HTTP/1.0".self::_CRLF;
+        $post.= 'Content-Type: application/x-www-form-urlencoded'.self::_CRLF;
+        $post.= "Content-Length: {$len}".self::_CRLF;
+        $post.= self::_CRLF;
         $post.= $data;
         $fd = $this->_connect($url['host']);
         $this->_putbuf[$fd] = $post;
@@ -233,7 +233,7 @@ class _HttpPostRequestQueue
         if (strlen($data) == 0) {
             return 0;
         }
-        $len = fwrite($stream, $data, self::BLOCK_SIZE);
+        $len = fwrite($stream, $data, self::_BLOCK_SIZE);
         $data = substr($data, $len);
         return $len;
     }
@@ -244,7 +244,7 @@ class _HttpPostRequestQueue
     private function _get($stream)
     {
         $fd = (int)$stream;
-        $data = fread($stream, self::BLOCK_SIZE);
+        $data = fread($stream, self::_BLOCK_SIZE);
         if (($len = strlen($data)) > 0) {
             $this->_getbuf[(int)$stream].= $data;
         }

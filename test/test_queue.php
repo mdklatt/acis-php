@@ -15,11 +15,6 @@ class RequestQueueTest extends PHPUnit_Framework_TestCase
     protected $_query;
     protected $_request;
     
-    protected function _loadData()
-    {
-        return json_decode(file_get_contents($this->_JSON_FILE), true);
-    }
-
     protected function setUp()
     {
         $test_data = $this->_loadData();
@@ -35,35 +30,53 @@ class RequestQueueTest extends PHPUnit_Framework_TestCase
         return;
     }
 
-    public function testExecute()
+    public function test()
     {
         $queue = new ACIS_RequestQueue();
         $queue->add($this->_request);
         $queue->add($this->_request);
         $queue->execute();
-        foreach($queue->results as $item)
-        {
+        foreach($queue->results as $item) {
             $this->assertEquals($this->_query['result'], $item['result']);
         }
         return;
     }
 
-    public function testExecuteResult()
+    /**
+     * Test query execution with a class name callback.
+     *
+     */
+    public function testClassCallback()
     {
         $queue = new ACIS_RequestQueue();
         $queue->add($this->_request, 'ACIS_StnDataResult');
         $queue->add($this->_request, 'ACIS_StnDataResult');
         $queue->execute();
         $result = new ACIS_StnDataResult($this->_query);
-        foreach($queue->results as $item)
-        {
+        foreach($queue->results as $item) {
             $this->assertEquals($result->meta, $item->meta);
-            $this->assertEquals($result->data, $item->data);
-            $this->assertEquals($result->smry, $item->smry);
         }
         return;
     }
     
+    /**
+     * Test query execution with a class name callback.
+     *
+     */
+    public function testFunctionCallback()
+    {
+        $callback = create_function('$query', 'return $query["result"];');
+        $queue = new ACIS_RequestQueue();
+        $queue->add($this->_request, $callback);
+        $queue->add($this->_request, $callback);
+        $queue->execute();
+        $result = new ACIS_StnDataResult($this->_query);
+        foreach($queue->results as $item) {
+            $this->assertEquals($this->_query['result'], $item);
+        }
+        return;
+    }
+
     public function testClear()
     {
         $queue = new ACIS_RequestQueue();
@@ -73,5 +86,10 @@ class RequestQueueTest extends PHPUnit_Framework_TestCase
         $queue->execute();
         $this->assertEquals(0, count($queue->results));
         return;
+    }
+
+    protected function _loadData()
+    {
+        return json_decode(file_get_contents($this->_JSON_FILE), true);
     }
 }

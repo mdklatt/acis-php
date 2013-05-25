@@ -19,6 +19,7 @@ class ACIS_RequestQueue
 {
     /**
      * Convert a POST reply to a JSON result object.
+     *
      */
     static private function _result($reply)
     {
@@ -44,6 +45,7 @@ class ACIS_RequestQueue
     
     /**
      * Initialize a RequestQueue object.
+     *
      */
     public function __construct()
     {
@@ -58,12 +60,12 @@ class ACIS_RequestQueue
      * accepts a query object as an argument; the query array will be 
      * converted to a result_type object.
      */
-    public function add($request, $result_type=null)
+    public function add($request, $callback=null)
     {
         $params = $request->params();
         $data = http_build_query(array('params' => json_encode($params)));
         $key = $this->_queue->add($request->url(), $data);
-        $this->_queries[$key] = array($request->params(), $result_type);
+        $this->_queries[$key] = array($request->params(), $callback);
         return;
     }
     
@@ -71,22 +73,29 @@ class ACIS_RequestQueue
      * Execute all Requests in the queue.
      *
      * When execution is complete, each element of the results attribute will 
-     * contain a query object or the optional result type specified for that 
-     * request.     
+     * contain a query object or the result of a callback that accepts the
+     * query as its only argument. The callback can be any callable object
+     * or a class name.
      */
     public function execute()
     {
         $this->_queue->execute();
         foreach ($this->_queue->replies as $key => $reply) {
             $result = self::_result($reply);
-            list($params, $result_type) = $this->_queries[$key];
-            $query = array('params' => $params, 'result' => $result);
-            if ($result_type == null) {
-                $this->results[$key] = $query;
+            list($params, $callback) = $this->_queries[$key];
+            $obj = array('params' => $params, 'result' => $result);
+            if ($callback != null) {
+                // Use the query as the argument to a function or to initialize
+                // an object.
+                if (is_callable($callback)) {
+                    $obj = call_user_func($callback, $obj);
+                }
+                else {
+                    // Assume that is is a class name.
+                    $obj = new $callback($obj);
+                }
             }
-            else {
-                $this->results[$key] = new $result_type($query);
-            }
+            $this->results[$key] = $obj;
         }
         $this->results = array_values($this->results);  // make keys sequential
         return;
@@ -117,7 +126,8 @@ class _HttpReply
     public $content;
     
     /**
-     * Initialize an HttpReply object. 
+     * Initialize an HttpReply object.
+     * 
      */     
     public function __construct($data)
     {

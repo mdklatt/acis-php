@@ -23,9 +23,11 @@ $pkg_dest = 'dist';
 if (!is_dir($pkg_dest) && !mkdir($pkg_dest, 0755, true)) {
 	throw Exception("could not create directory {$pkg_dest}");
 }
+
 $phar_name = "{$pkg_name}-${pkg_ver}.phar";
 $phar_path = $pkg_dest.DIRECTORY_SEPARATOR.$phar_name;
 $phar = new Phar($phar_path, 0, $phar_name);
 $phar->buildFromDirectory($pkg_path, '/\.php/');
-$phar->setStub(Phar::createDefaultStub($pkg_init));
-printf("%d file(s) added to archive {$phar_path}".PHP_EOL, count($phar));
+$phar->setStub(file_get_contents('stub.php'));
+printf("%d file(s) added to archive {$phar_path}".PHP_EOL, $phar->count());
+

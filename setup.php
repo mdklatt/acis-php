@@ -18,7 +18,7 @@ $PACKAGE_CONFIG = array(
 
 // Execute the script.
 
-$_DEBUG = true;  // should be command-line setting.
+$_DEBUG = false;  // should be command-line setting.
 $_COMMANDS = array('test' => 'TestCommand', 'archive' => 'ArchiveCommand');
 
 try {
@@ -47,8 +47,18 @@ function main($config, $argv)
     // a single array with command-line options taking precedence in the case
     // of duplicates.
     global $_COMMANDS;
-    $command = new $_COMMANDS[$argv[1]]();
-    return $command($config);
+    foreach (array_slice($argv, 1) as $cmdname) {
+        if (!($cmdclass = @$_COMMANDS[$cmdname])) {
+            $message = "unknown command name: {$cmdname}";
+            throw new InvalidArgumentException($message);
+        }
+        $command = new $cmdclass();
+        if (($status = $command($config)) != 0) {
+            $message = "command failed: {$cmdname} ({$status})";
+            throw new RuntimeException($message);
+        }        
+    }
+    return 0;
 }
 
 

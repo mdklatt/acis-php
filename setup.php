@@ -18,7 +18,7 @@ $PACKAGE_CONFIG = array(
 
 // Execute the script.
 
-$_DEBUG = false;  // should be command-line setting.
+$_DEBUG = false;  // should be command-line setting
 $_COMMANDS = array('test' => 'TestCommand', 'archive' => 'ArchiveCommand');
 
 try {
@@ -122,6 +122,7 @@ class ArchiveCommand extends Command
         }
         $name = "{$config['name']}-{$config['version']}.phar";
         $path = $name;
+        @unlink($path);  // always create new archive
         $phar = new Phar($path, 0, $name);
         $phar->buildFromDirectory($config['path'], '/\.php/'); 
         $phar->setStub($this->_stub($config['init']));

@@ -11,19 +11,23 @@ applications. There is also a [Python version][7].
 
 Requirements
 ------------
-PHP 5.2 - 5.4
-
+* PHP 5.2 - 5.4
+* [phar][10] extension (optional; required to create .phar file from setup script)
+* [PHPUnit][11] library (optional; required to run tests) 
+ 
 
 Installation
 ------------
-All the required files are in the [acis][2] directory, or a self-contained
-[phar archive][3] can be downloaded. The directory or the phar file must be
-visible in the [PHP include path][6].
+All the required files are in the [acis][2] directory, or a self-contained 
+[PHP Archive][3] can be created using the setup script. Place the directory or 
+.phar file in the [PHP include path][6].
+
+    php -f setup.php archive
 
 
 Usage
 -----
-To use the library either `acis/acis.php` *or* `acis.phar` must be included.
+To use the library either `acis/acis.php` *or* the .phar file must be included.
     
     require_once 'acis/acis.php'; 
     require_once 'acis.phar'; 
@@ -53,10 +57,12 @@ Known Issues
 
 [1]: http://github.com/mdklatt/acis-php "acis-php"
 [2]: http://github.com/mdklatt/acis-php/tree/master/acis "acis"
-[3]: http://github.com/mdklatt/acis-php/downloads "downloads"
+[3]: http://php.net/manual/en/phar.using.intro.php "Phar archives"
 [4]: http://github.com/mdklatt/acis-php/blob/master/doc/tutorial.php "tutorial"
 [5]: http://data.rcc-acis.org "ACIS WS"
 [6]: http://us.php.net/manual/en/ini.core.php#ini.include-path "PHP include"
 [7]: http://github.com/mdklatt/acis-python "acis-python"
 [8]: https://travis-ci.org/mdklatt/acis-php.png?branch=master "Travis logo"
 [9]: https://travis-ci.org/mdklatt/acis-php "Travis-CI"
+[10]: http://www.php.net/manual/en/intro.phar.php "phar extension"
+[11]: http://phpunit.de/manual/current/en/index.html "PHPUnit"

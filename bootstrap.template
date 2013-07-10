@@ -1,6 +1,6 @@
 <?php
 /**
- * Bootstrap loader (stub) template for a PHP Archive file.
+ * Bootstrap loader (stub) template for an ACIS library PHP Archive file.
  * 
  * This file is used by setup.php to generate the stub code for a library .phar
  * file. The following template variables are used for code generation:
@@ -13,11 +13,13 @@
  * library, but it can do any initialization tasks.
  */
 
+define('ACIS_INIT_FILE', {{init}});
+
 // Take advantage of the phar extension if it's available.
 
 if (class_exists('Phar')) {
     Phar::mapPhar();
-    include 'phar://'.__FILE__.'/'.Extract_Phar::START;
+    include 'phar://'.__FILE__.'/'.ACIS_INIT_FILE;
     return;
 }
 
@@ -27,7 +29,7 @@ if (class_exists('Phar')) {
 // Phar::createDefaultStub() function. It's still ugly, but it works well 
 // enough for now.
 
-class Extract_Phar
+class Acis_ExtractPhar
 {
     static $temp;
     static $origdir;
@@ -115,7 +117,7 @@ class Extract_Phar
 
         chdir($temp);
         if (!$return) {
-            include self::START;
+            include ACIS_INIT_FILE;
         }
         chdir(self::$origdir);
         
@@ -218,6 +220,6 @@ class Extract_Phar
 
 }  // end of class
 
-Extract_Phar::go();
+Acis_ExtractPhar::go();
 __HALT_COMPILER(); ?>
 
